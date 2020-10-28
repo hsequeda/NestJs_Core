@@ -1,6 +1,0 @@
-export enum FilesActions {
-	FILE_ADD = 'FILE_ADD',
-	FILE_DELETE = 'FILE_DELETE',
-	FILE_UPDATE = 'FILE_UPDATE',
-	FILE_CREATE = 'FILE_CREATE'
-}
