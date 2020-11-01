@@ -11,7 +11,7 @@ export class AppService implements OnModuleInit{
 
 
   constructor(private readonly logger: AppLoggerService) {
-
+     logger.setContext("APP-CONTROLLER")
   }
   onModuleInit(): any {
 
