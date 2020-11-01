@@ -19,5 +19,5 @@ export const emailConfig = registerAs('smtp', () => ({
 export const loggerConfig = registerAs('logger', () => ({
   level: process.env.LOGGER_LEVEL,
   enabled: process.env.LOGGER_ENABLED,
-  inFile: process.env.LOGGER_IN_FILE
+  inFile: process.env.LOGGER_IN_FILE,
 }));

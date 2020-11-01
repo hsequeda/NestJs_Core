@@ -1,4 +1,4 @@
 import { InputType } from '@nestjs/graphql';
 
 @InputType()
-export class BaseInput { }
+export class BaseInput {}

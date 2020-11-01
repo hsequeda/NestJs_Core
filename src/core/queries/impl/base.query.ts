@@ -1,2 +1,1 @@
-
-export class BaseQuery { }
+export class BaseQuery {}

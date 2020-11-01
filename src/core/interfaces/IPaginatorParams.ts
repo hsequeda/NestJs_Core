@@ -1,6 +1,5 @@
-
 export interface IPaginatorParams {
-	page?: number;
-	limit?: number;
-	query?: string;
+  page?: number;
+  limit?: number;
+  query?: string;
 }

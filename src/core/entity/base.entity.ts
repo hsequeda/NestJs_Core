@@ -1,3 +1,4 @@
+import { prop } from "@typegoose/typegoose";
 import { ObjectType } from '@nestjs/graphql';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 

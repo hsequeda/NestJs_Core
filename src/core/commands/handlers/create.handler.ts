@@ -4,9 +4,9 @@ import { CreateCommand } from '../impl/create.command';
 
 @CommandHandler(CreateCommand)
 export class CreateHandler<T> implements ICommandHandler<CreateCommand> {
-	constructor(private readonly repository: BaseRepository<T>) { }
+  constructor(private readonly repository: BaseRepository<T>) {}
 
-	async execute(entry: CreateCommand): Promise<T> {
-		return await this.repository.create(entry.input);
-	}
+  async execute(entry: CreateCommand): Promise<T> {
+    return await this.repository.create(entry.input);
+  }
 }

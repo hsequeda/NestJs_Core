@@ -1,13 +1,10 @@
-import { Injectable, Logger, LoggerService } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, LoggerService } from '@nestjs/common';
 import * as winston from 'winston';
-import { Transports } from 'winston/lib/winston/transports';
 import { AppConfigService } from '../../config/service/app-config-service';
 
 @Injectable()
 export class AppLoggerService implements LoggerService {
-
-  protected logger;
+  protected logger: winston.Logger;
   protected context: string;
 
   constructor(private readonly _configService: AppConfigService) {
@@ -20,7 +17,7 @@ export class AppLoggerService implements LoggerService {
     const transports: any[] = [];
     transports.push(new winston.transports.Console());
 
-    if(loggerConfig.inFile){
+    if (loggerConfig.inFile) {
       transports.push(new winston.transports.File({ filename: 'app.log' }));
     }
 
@@ -31,15 +28,10 @@ export class AppLoggerService implements LoggerService {
 
     return {
       level: loggerConfig.level,
-      format: combine(
-        colorize({ all: true }),
-        timestamp(),
-        customFormat,
-      ),
-      transports: transports
+      format: combine(colorize({ all: true }), timestamp(), customFormat),
+      transports: transports,
     };
   }
-
 
   log(message: any, context?: string): any {
     this.logger.log('info', this.processMessage(message, context));
