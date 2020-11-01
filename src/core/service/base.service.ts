@@ -1,9 +1,4 @@
-import { InternalServerErrorException } from '@nestjs/common';
 
-import { AnyParamConstructor } from '@typegoose/typegoose/lib/types';
-import { ReturnModelType } from '@typegoose/typegoose';
-import { MongoError } from 'mongodb';
-import { Types, CreateQuery } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 
 import { IPaginatedData } from 'src/core/interfaces/IPaginatedData';
@@ -46,7 +41,7 @@ export class BaseService<T> {
     return await this.queryBus.execute(findQuery);
   }
 
-  async findPaginatedQuery(findPaginatedQuery: FindPaginatedQuery): Promise<IPaginatedData<T>> {
+  async findPaginatedQuery(findPaginatedQuery: FindPaginatedQuery): Promise<any> {
     return await this.queryBus.execute(findPaginatedQuery);
   }
 

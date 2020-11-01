@@ -74,6 +74,4 @@ export class AppLoggerService implements LoggerService {
   setContext(context: string) {
     this.context = context;
   }
-
-
 }

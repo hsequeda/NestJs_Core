@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 
 import { join } from 'path';
 import { AppResolver } from './app.resolver';
@@ -14,6 +16,19 @@ import { AppLoggerModule } from './common/logger/app-logger.module';
   imports: [
     AppConfigModule,
     AppLoggerModule,
+
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: process.env.DATABASE_HOST,
+      port: +process.env.DATABASE_PORT,
+      username: process.env.DATABASE_USER,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_NAME,
+      entities: [__dirname + '/**/**/*.entity{.ts}'],
+      synchronize: true,
+    }),
+
+
     GraphQLModule.forRoot({
       context: ({ req, connection }) => {
         // Return connection context when is a Subscription
