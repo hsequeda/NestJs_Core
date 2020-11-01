@@ -5,12 +5,9 @@ import { IAppConfig } from '../interfaces/IAppConfig';
 import { ISMTPConfig } from '../interfaces/ISMTPConfig';
 import { ILoggerConfig, LoggerLevel } from '../interfaces/ILoggerConfig';
 
-
 @Injectable()
 export class AppConfigService {
-
-  constructor(private readonly _configService: ConfigService) {
-  }
+  constructor(private readonly _configService: ConfigService) {}
 
   getAppConfig(): IAppConfig {
     return {
@@ -42,5 +39,4 @@ export class AppConfigService {
       inFile: this._configService.get<boolean>('logger.inFile'),
     };
   }
-
 }

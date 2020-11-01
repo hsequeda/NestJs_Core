@@ -1,3 +1,3 @@
-export interface IAppConfig{
+export interface IAppConfig {
   port?: number;
 }

@@ -7,6 +7,3 @@ export class PaginatorParams implements IPaginatorParams {
   @Field(type => Int) limit?: number;
   @Field(type => String) query?: string;
 }
-
-
-

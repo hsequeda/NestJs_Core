@@ -1,7 +1,12 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
-import { appConfig, databaseConfig, emailConfig, loggerConfig } from './app.config';
+import {
+  appConfig,
+  databaseConfig,
+  emailConfig,
+  loggerConfig,
+} from './app.config';
 import { AppConfigService } from './service/app-config-service';
 
 @Global()
@@ -13,7 +18,9 @@ import { AppConfigService } from './service/app-config-service';
       validationSchema: Joi.object({
         PORT: Joi.number().default(4000),
         DATABASE_PORT: Joi.number().default(1521),
-        LOGGER_LEVEL: Joi.string().valid('info', 'error', 'warn', 'debug', 'verbose').default('debug'),
+        LOGGER_LEVEL: Joi.string()
+          .valid('info', 'error', 'warn', 'debug', 'verbose')
+          .default('debug'),
         LOGGER_ENABLED: Joi.boolean().default(true),
         LOGGER_IN_FILE: Joi.boolean().default(false),
         SMTP_PORT: Joi.number().valid(25, 465),
@@ -23,7 +30,6 @@ import { AppConfigService } from './service/app-config-service';
     }),
   ],
   providers: [AppConfigService],
-  exports: [AppConfigService]
+  exports: [AppConfigService],
 })
-export class AppConfigModule {
-}
+export class AppConfigModule {}

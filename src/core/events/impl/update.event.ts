@@ -1,7 +1,7 @@
-import { BaseEvent } from "./base.event";
+import { BaseEvent } from './base.event';
 
 export class UpdateEvent extends BaseEvent {
-	constructor(public updateResult: any) {
-		super();
-	}
+  constructor(public updateResult: any) {
+    super();
+  }
 }

@@ -4,17 +4,15 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 
 @Injectable()
-export class AppService implements OnModuleInit{
+export class AppService implements OnModuleInit {
   getHello(): string {
     return 'Hello World!';
   }
 
-
   constructor(private readonly logger: AppLoggerService) {
-     logger.setContext("APP-CONTROLLER")
+    logger.setContext('APP-CONTROLLER');
   }
   onModuleInit(): any {
-
     this.logger.error('ERROR');
     this.logger.debug('DEBUG');
     this.logger.warn('WARN');

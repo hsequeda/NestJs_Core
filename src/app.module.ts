@@ -60,7 +60,6 @@ import { AppLoggerModule } from './common/logger/app-logger.module';
             strict: true,
           },
         },
-
       }),
     }),
   ],

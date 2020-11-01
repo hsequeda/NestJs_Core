@@ -24,11 +24,11 @@ import { DeleteOneCommand } from '../commands/impl/delete-one.command';
 
 @Injectable()
 export class BaseService<T> {
-
-  constructor(private readonly commandBus: CommandBus,
-              private readonly queryBus: QueryBus,
-              private readonly eventBus: EventBus) {
-  }
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+    private readonly eventBus: EventBus,
+  ) {}
 
   getCommandBus(): CommandBus {
     return this.commandBus;
@@ -46,7 +46,9 @@ export class BaseService<T> {
     return await this.queryBus.execute(findQuery);
   }
 
-  async findPaginatedQuery(findPaginatedQuery: FindPaginatedQuery): Promise<IPaginatedData<T>> {
+  async findPaginatedQuery(
+    findPaginatedQuery: FindPaginatedQuery,
+  ): Promise<IPaginatedData<T>> {
     return await this.queryBus.execute(findPaginatedQuery);
   }
 
@@ -62,7 +64,9 @@ export class BaseService<T> {
     return await this.commandBus.execute(deleteCommand);
   }
 
-  async deleteOneCommand(deleteOneCommand: DeleteOneCommand): Promise<T | null> {
+  async deleteOneCommand(
+    deleteOneCommand: DeleteOneCommand,
+  ): Promise<T | null> {
     return await this.commandBus.execute(deleteOneCommand);
   }
 
@@ -77,6 +81,4 @@ export class BaseService<T> {
   async countQuery(filter = {}): Promise<number> {
     return null;
   }
-
-
 }
