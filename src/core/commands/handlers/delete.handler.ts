@@ -1,12 +1,13 @@
 import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
-import { BaseRepository } from '../../repository/base.repository';
+import { BaseOrm } from '../../orm/base.orm';
 import { DeleteCommand } from '../impl/delete.command';
+import { DeleteResult } from 'typeorm';
 
 @CommandHandler(DeleteCommand)
 export class DeleteHandler<T> implements ICommandHandler<DeleteCommand> {
-  constructor(private readonly repository: BaseRepository<T>) {}
+  constructor(private readonly _orm: BaseOrm<T>) {}
 
-  async execute(entry: DeleteCommand): Promise<any> {
-    return await this.repository.delete(entry.filter);
+  async execute(entry: DeleteCommand): Promise<DeleteResult> {
+    return await this._orm.delete(entry.filter);
   }
 }

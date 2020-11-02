@@ -1,16 +1,13 @@
 import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
-import { BaseRepository } from '../../repository/base.repository';
+import { BaseOrm } from '../../orm/base.orm';
 import { UpdateOneCommand } from '../impl/update-one.command';
+import { UpdateResult } from 'typeorm';
 
 @CommandHandler(UpdateOneCommand)
 export class UpdateOneHandler<T> implements ICommandHandler<UpdateOneCommand> {
-  constructor(private readonly repository: BaseRepository<T>) {}
+  constructor(private readonly _orm: BaseOrm<T>) {}
 
-  async execute(entry: UpdateOneCommand): Promise<T> {
-    return await this.repository.updateOne(
-      entry.filter,
-      entry.input,
-      entry.upsert,
-    );
+  async execute(entry: UpdateOneCommand): Promise<UpdateResult> {
+    return await this._orm.update(entry.filter, entry.input);
   }
 }

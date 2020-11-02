@@ -1,10 +1,10 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import * as winston from 'winston';
-import { AppConfigService } from '../../config/service/app-config-service';
+import { AppConfigService } from 'src/config/service/app-config-service';
 
 @Injectable()
 export class AppLoggerService implements LoggerService {
-  protected logger: winston.Logger;
+  logger: winston.Logger;
   protected context: string;
 
   constructor(private readonly _configService: AppConfigService) {

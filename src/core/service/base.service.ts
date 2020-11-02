@@ -1,9 +1,8 @@
-
 import { Injectable } from '@nestjs/common';
 
 import { IPaginatedData } from 'src/core/interfaces/IPaginatedData';
 import { IPaginatorParams } from 'src/core/interfaces/IPaginatorParams';
-import { BaseRepository } from '../repository/base.repository';
+import { BaseOrm } from '../orm/base.orm';
 
 import { CommandBus, QueryBus, EventBus } from '@nestjs/cqrs';
 import { FindOneQuery } from '../queries/impl/findone.query';
@@ -19,11 +18,11 @@ import { DeleteOneCommand } from '../commands/impl/delete-one.command';
 
 @Injectable()
 export class BaseService<T> {
-
-  constructor(private readonly commandBus: CommandBus,
-              private readonly queryBus: QueryBus,
-              private readonly eventBus: EventBus) {
-  }
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+    private readonly eventBus: EventBus,
+  ) {}
 
   getCommandBus(): CommandBus {
     return this.commandBus;
@@ -41,37 +40,35 @@ export class BaseService<T> {
     return await this.queryBus.execute(findQuery);
   }
 
-  async findPaginatedQuery(findPaginatedQuery: FindPaginatedQuery): Promise<any> {
+  async findPaginatedQuery(
+    findPaginatedQuery: FindPaginatedQuery,
+  ): Promise<any> {
     return await this.queryBus.execute(findPaginatedQuery);
   }
 
   async findOneQuery(findOneQuery: FindOneQuery): Promise<T> {
-    return await this.queryBus.execute(findOneQuery);
+    return this.queryBus.execute(findOneQuery);
   }
 
   async createCommand(createCommand: CreateCommand): Promise<T> {
-    return await this.commandBus.execute(createCommand);
+    return this.commandBus.execute(createCommand);
   }
 
   async deleteCommand(deleteCommand: DeleteCommand): Promise<any> {
-    return await this.commandBus.execute(deleteCommand);
+    return this.commandBus.execute(deleteCommand);
   }
 
-  async deleteOneCommand(deleteOneCommand: DeleteOneCommand): Promise<T | null> {
-    return await this.commandBus.execute(deleteOneCommand);
+  async deleteOneCommand(
+    deleteOneCommand: DeleteOneCommand,
+  ): Promise<T | null> {
+    return this.commandBus.execute(deleteOneCommand);
   }
 
   async updateOneCommand(updateOneCommand: UpdateOneCommand): Promise<T> {
-    return await this.commandBus.execute(updateOneCommand);
+    return this.commandBus.execute(updateOneCommand);
   }
 
   async updateCommand(updateCommand: UpdateCommand): Promise<any> {
-    return await this.commandBus.execute(updateCommand);
+    return this.commandBus.execute(updateCommand);
   }
-
-  async countQuery(filter = {}): Promise<number> {
-    return null;
-  }
-
-
 }

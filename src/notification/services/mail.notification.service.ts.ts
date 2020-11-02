@@ -1,8 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { AppLoggerService } from 'src/common/logger/service/app-logger.service';
 
 export enum MailType {
   WELCOME = 'welcome',
@@ -11,36 +8,24 @@ export enum MailType {
 
 @Injectable()
 export class MailNotificationService {
-  constructor(
-    @Inject()
-    private _loggerService: AppLoggerService,
-    private readonly mailerService: MailerService,
-  ) {
-    _loggerService.log('cosa');
-  }
+  constructor(@Inject() private readonly _mailerService: MailerService) {}
 
-  public send(to: string, type: MailType, subject?: string, data?: any): void {
-    this.mailerService
-      .sendMail({
-        to: to,
-        subject: subject,
-        template: type,
-        context: { ...data },
-      })
-      .then(res => {
-        Logger.log(
-          `Sending email to: ${to}, of type: ${type}`,
-          'MailNotificationService',
-        );
-      })
-      .catch(e => {
-        Logger.log(e, 'MailNotificationService');
-      });
+  public async send(
+    to: string,
+    type: MailType,
+    subject?: string,
+    data?: any,
+  ): Promise<any> {
+    return this._mailerService.sendMail({
+      to: to,
+      subject: subject,
+      template: type,
+      context: { ...data },
+    });
   }
 
   //@Cron(CronExpression.EVERY_5_SECONDS)
   private test() {
-    console.log('test mail');
     this.send('dariel87@gmail.com', MailType.WELCOME, 'Bienvenido De prueba', {
       user: {
         avatarUrl:

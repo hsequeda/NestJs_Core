@@ -1,12 +1,12 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { BaseRepository } from '../../repository/base.repository';
+import { BaseOrm } from '../../orm/base.orm';
 import { FilterQuery } from '../impl/filter.query';
 
 @QueryHandler(FilterQuery)
 export class CountHandler<T> implements IQueryHandler<FilterQuery> {
-  constructor(private readonly repository: BaseRepository<T>) {}
+  constructor(private readonly _orm: BaseOrm<T>) {}
 
   async execute(query: FilterQuery): Promise<number> {
-    return await this.repository.count(query.filter);
+    return await this._orm.count(query.filter);
   }
 }

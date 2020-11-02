@@ -1,19 +1,12 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { BaseRepository } from '../../repository/base.repository';
+import { BaseOrm } from '../../orm/base.orm';
 import { FindQuery } from '../impl/find.query';
 
 @QueryHandler(FindQuery)
 export class FindHandler<T> implements IQueryHandler<FindQuery> {
-  constructor(private readonly repository: BaseRepository<T>) {}
+  constructor(private readonly _orm: BaseOrm<T>) {}
 
   async execute(query: FindQuery): Promise<T[]> {
-    return this.repository.find(
-      query.filter,
-      query.populate,
-      query.select,
-      query.sort,
-      query.skip,
-      query.limit,
-    );
+    return this._orm.find(query.filter);
   }
 }

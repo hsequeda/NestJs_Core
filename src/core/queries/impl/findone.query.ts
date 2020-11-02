@@ -1,7 +1,8 @@
 import { BaseQuery } from './base.query';
+import { FindOneOptions } from 'typeorm';
 
 export class FindOneQuery extends BaseQuery {
-  constructor(public filter?: any, public populate?: any, public select?: any) {
+  constructor(public filter?: FindOneOptions) {
     super();
   }
 }

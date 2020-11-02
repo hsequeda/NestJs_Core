@@ -1,20 +1,16 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
-import { AppLoggerService } from './common/logger/service/app-logger.service';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
+import { AppLoggerService } from './logger/service/app-logger.service';
 
 @Injectable()
-export class AppService implements OnModuleInit{
+export class AppService implements OnModuleInit {
   getHello(): string {
     return 'Hello World!';
   }
 
-
   constructor(private readonly logger: AppLoggerService) {
-     logger.setContext('AppService')
+    logger.setContext('AppService');
   }
   onModuleInit(): any {
-
     this.logger.error('ERROR');
     this.logger.debug('DEBUG');
     this.logger.warn('WARN');

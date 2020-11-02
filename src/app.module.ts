@@ -2,32 +2,27 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-
-import { join } from 'path';
 import { AppResolver } from './app.resolver';
-import { AppConfigModule } from './common/config/app-config.module';
-import { AppLoggerModule } from './common/logger/app-logger.module';
+import { AppConfigModule } from './config/app-config.module';
+import { AppLoggerModule } from './logger/app-logger.module';
+import { UserModule } from './user/user.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
-    AppConfigModule,
-    AppLoggerModule,
-
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'postgres',
       host: process.env.DATABASE_HOST,
       port: +process.env.DATABASE_PORT,
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [__dirname + '/**/**/*.entity{.ts}'],
+      autoLoadEntities: true,
       synchronize: true,
     }),
-
 
     GraphQLModule.forRoot({
       context: ({ req, connection }) => {
@@ -51,32 +46,10 @@ import { AppLoggerModule } from './common/logger/app-logger.module';
       },
     }),
 
-    MailerModule.forRootAsync({
-      useFactory: () => ({
-        transport: {
-          host: process.env.SMTP_HOST,
-          port: Number(process.env.SMTP_PORT),
-          tls: {
-            rejectUnauthorized: false,
-          },
-          secure: Number(process.env.SMTP_PORT) === 465 ? true : false,
-          auth: {
-            user: process.env.SMTP_EMAIL,
-            pass: process.env.SMTP_PASSWORD,
-          },
-        },
-        defaults: {
-          from: `APP-NAME <${process.env.SMTP_EMAIL}>`,
-        },
-        template: {
-          dir: join(__dirname, '..', 'templates'),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
-          },
-        },
-      }),
-    }),
+    AppConfigModule,
+    AppLoggerModule,
+    //NotificationModule,
+    UserModule,
   ],
 
   controllers: [AppController],
