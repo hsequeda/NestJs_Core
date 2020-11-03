@@ -3,25 +3,29 @@ import { MailNotificationService } from './services/mail.notification.service.ts
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { AppConfigModule } from 'src/config/app-config.module';
+import { AppConfigService } from 'src/config/service/app-config-service';
 
 @Module({
   imports: [
     MailerModule.forRootAsync({
-      useFactory: () => ({
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => ({
         transport: {
-          host: process.env.SMTP_HOST,
-          port: +process.env.SMTP_PORT,
+          host: config.smtp.host,
+          port: config.smtp.port,
           tls: {
             rejectUnauthorized: false,
           },
-          secure: +process.env.SMTP_PORT === 465 ? true : false,
+          secure: config.smtp.port === 465 ? true : false,
           auth: {
-            user: process.env.SMTP_EMAIL,
-            pass: process.env.SMTP_PASSWORD,
+            user: config.smtp.email,
+            pass: config.smtp.password,
           },
         },
         defaults: {
-          from: `APP-NAME <${process.env.SMTP_EMAIL}>`,
+          from: `APP-NAME <${config.smtp.email}>`,
         },
         template: {
           dir: join(__dirname, '..', '..', 'templates'),
