@@ -5,7 +5,6 @@ import { AppConfigService } from './service/app-config-service';
 import { appConfig, appSchema } from './namespaces/app.config';
 import { databaseSchema, databaseConfig } from './namespaces/database.config';
 import { emailSchema, emailConfig } from './namespaces/email.config';
-import { loggerConfig, loggerSchema } from './namespaces/logger.config';
 import { graphqlConfig, graphqlSchema } from './namespaces/graphql.config';
 
 @Global()
@@ -13,18 +12,11 @@ import { graphqlConfig, graphqlSchema } from './namespaces/graphql.config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [
-        appConfig,
-        databaseConfig,
-        emailConfig,
-        loggerConfig,
-        graphqlConfig,
-      ],
+      load: [appConfig, databaseConfig, emailConfig, graphqlConfig],
       validationSchema: Joi.object({
         ...appSchema,
         ...databaseSchema,
         ...emailSchema,
-        ...loggerSchema,
         ...graphqlSchema,
       }),
       validationOptions: { abortEarly: true },

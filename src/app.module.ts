@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, LogLevel } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -57,4 +57,10 @@ import * as depthLimit from 'graphql-depth-limit';
   controllers: [AppController],
   providers: [AppService, AppResolver],
 })
-export class AppModule {}
+export class AppModule {
+  static port: number;
+
+  constructor(private readonly _configService: AppConfigService) {
+    AppModule.port = this._configService.app.port;
+  }
+}

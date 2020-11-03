@@ -1,19 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, ValidationError } from '@nestjs/common';
+import { ValidationPipe, ValidationError, Logger } from '@nestjs/common';
 import { UserInputError } from 'apollo-server-express';
 import { AppConfigService } from './config/service/app-config-service';
+import { AppConfigModule } from './config/app-config.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const auxApp = await NestFactory.createApplicationContext(AppConfigModule);
+  const logLevel = auxApp.get(AppConfigService).app.logLevel;
+  await auxApp.close();
+
+  const app = await NestFactory.create(AppModule, {
+    logger: logLevel,
+  });
+
   const configService: AppConfigService = app.get(AppConfigService);
-  /* app.useLogger(new AppLoggerService(configService)); */
-  /* const loggerConfig: ILoggerConfig = configService.getLoggerConfig(); */
-  /* let logger = null; */
-  /* if (loggerConfig.enabled) { */
-  /*   logger = new AppLoggerService(configService); */
-  /*   app.useLogger(logger); */
-  /* } */
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (errors: ValidationError[]) => {
@@ -26,13 +27,10 @@ async function bootstrap() {
     }),
   );
   await app.listen(configService.app.port);
-  /* throw new Error('implements me!'); */
-  /* logger */
-  /*   ? logger.debug( */
-  /*       `🚀 Server running on port :${appConfig.port}`, */
-  /*       'NestApplication', */
-  /*     ) */
-  /*   : null; */
+  Logger.log(
+    `🚀 Server running on port :${configService.app.port}`,
+    'NestApplication',
+  );
 }
 
 bootstrap();

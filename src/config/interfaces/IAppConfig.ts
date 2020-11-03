@@ -1,3 +1,5 @@
+import { LogLevel } from '@nestjs/common';
+
 /**
  * Application configuration
  *
@@ -28,4 +30,12 @@ export interface IAppConfig {
    * @memberof IAppConfig
    */
   cors: boolean;
+
+  /**
+   * App log level admiseds.
+   *
+   * @type {LogLevel}
+   * @memberof IAppConfig
+   */
+  logLevel: LogLevel[];
 }

@@ -5,6 +5,7 @@ export const appConfig = registerAs('app', () => ({
   cors: process.env.ENABLE_CORS,
   port: process.env.PORT,
   nodeEnv: process.env.NODE_ENV,
+  logLevel: process.env.LOG_LEVEL,
 }));
 
 export const appSchema = {
@@ -13,5 +14,5 @@ export const appSchema = {
   NODE_ENV: Joi.string()
     .valid('development', 'production', 'test', 'provision')
     .default('test'),
+  LOG_LEVEL: Joi.string().valid('log', 'error', 'warn', 'debug', 'verbose'),
 };
-
