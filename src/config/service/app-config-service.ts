@@ -1,42 +1,46 @@
-import { Injectable, Logger, LoggerService } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IDataBaseConfig } from '../interfaces/IDataBaseConfig';
 import { IAppConfig } from '../interfaces/IAppConfig';
 import { ISMTPConfig } from '../interfaces/ISMTPConfig';
 import { ILoggerConfig, LoggerLevel } from '../interfaces/ILoggerConfig';
+import { IGraphqlConfig } from '../interfaces/IGraphqlConfig';
 
 @Injectable()
 export class AppConfigService {
   constructor(private readonly _configService: ConfigService) {}
 
-  getAppConfig(): IAppConfig {
-    return {
-      port: this._configService.get<number>('app.port'),
-    };
-  }
+  app: IAppConfig = {
+    cors: this._configService.get<boolean>('app.cors'),
+    port: this._configService.get<number>('app.port'),
+    nodeEnv: this._configService.get<string>('app.nodeEnv'),
+  };
 
-  getDataBaseConfig(): IDataBaseConfig {
-    return {
-      host: this._configService.get<string>('database.host'),
-      port: this._configService.get<number>('database.port'),
-      db: this._configService.get<string>('database.db'),
-    };
-  }
+  database: IDataBaseConfig = {
+    type: this._configService.get<string>('database.type'),
+    username: this._configService.get<string>('database.username'),
+    password: this._configService.get<string>('database.password'),
+    connectionString:
+      this._configService.get<string>('database.connectionString') ?? undefined,
+    host: this._configService.get<string>('database.host') ?? undefined,
+    database: this._configService.get<string>('database.database') ?? undefined,
+  };
 
-  getSmtpConfig(): ISMTPConfig {
-    return {
-      host: this._configService.get<string>('smtp.host'),
-      port: this._configService.get<number>('smtp.port'),
-      email: this._configService.get<string>('smtp.email'),
-      password: this._configService.get<string>('smtp.password'),
-    };
-  }
+  smtp: ISMTPConfig = {
+    host: this._configService.get<string>('smtp.host'),
+    port: this._configService.get<number>('smtp.port'),
+    email: this._configService.get<string>('smtp.email'),
+    password: this._configService.get<string>('smtp.password'),
+  };
 
-  getLoggerConfig(): ILoggerConfig {
-    return {
-      enabled: this._configService.get<boolean>('logger.enabled'),
-      level: this._configService.get<LoggerLevel>('logger.level'),
-      inFile: this._configService.get<boolean>('logger.inFile'),
-    };
-  }
+  logger: ILoggerConfig = {
+    level: this._configService.get<LoggerLevel>('logger.level'),
+  };
+
+  graphql: IGraphqlConfig = {
+    schema: this._configService.get<LoggerLevel>('graphql.schema'),
+    maxFiles: this._configService.get<number>('graphql.maxFiles'),
+    maxFileSize: this._configService.get<number>('graphql.maxFileSize'),
+    depthLimit: this._configService.get<number>('graphql.depthLimit'),
+  };
 }

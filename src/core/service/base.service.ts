@@ -1,16 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { IPaginatedData } from 'src/core/interfaces/IPaginatedData';
-import { IPaginatorParams } from 'src/core/interfaces/IPaginatorParams';
-import { BaseOrm } from '../orm/base.orm';
-
 import { CommandBus, QueryBus, EventBus } from '@nestjs/cqrs';
 import { FindOneQuery } from '../queries/impl/findone.query';
 import { CreateCommand } from '../commands/impl/create.command';
 import { FindQuery } from '../queries/impl/find.query';
 import { UpdateCommand } from '../commands/impl/update.command';
 import { UpdateOneCommand } from '../commands/impl/update-one.command';
-import { CreateEvent } from '../events/impl/create.event';
 import { BaseEvent } from '../events/impl/base.event';
 import { FindPaginatedQuery } from '../queries/impl/find-paginated.query';
 import { DeleteCommand } from '../commands/impl/delete.command';

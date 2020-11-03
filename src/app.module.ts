@@ -2,53 +2,55 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
-
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { AppResolver } from './app.resolver';
 import { AppConfigModule } from './config/app-config.module';
-import { AppLoggerModule } from './logger/app-logger.module';
 import { UserModule } from './user/user.module';
-import { NotificationModule } from './notification/notification.module';
+import { AppConfigService } from './config/service/app-config-service';
+import { ConnectionOptions } from 'typeorm';
+import { AppResolver } from './app.resolver';
+import * as depthLimit from 'graphql-depth-limit';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_HOST,
-      port: +process.env.DATABASE_PORT,
-      username: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-      autoLoadEntities: true,
-      synchronize: true,
-    }),
-
-    GraphQLModule.forRoot({
-      context: ({ req, connection }) => {
-        // Return connection context when is a Subscription
-        return connection ? { req: connection.context } : { req };
-      },
-      autoSchemaFile: 'schema.gql',
-      installSubscriptionHandlers: true,
-      debug: true,
-      introspection: true,
-      playground: true,
-      cors: false,
-      subscriptions: {
-        onConnect: connectionParams => {
-          return { connectionParams };
-        },
-      },
-      uploads: {
-        maxFileSize: 10000000, // 10 MB
-        maxFiles: 2,
+    TypeOrmModule.forRootAsync({
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      async useFactory(config: AppConfigService) {
+        return {
+          entities: [__dirname + '/**/entities/*.entity{.ts,.js}'],
+          ...config.database,
+        } as ConnectionOptions;
       },
     }),
-
+    GraphQLModule.forRootAsync({
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      async useFactory(config: AppConfigService) {
+        return {
+          autoSchemaFile: config.graphql.schema,
+          playground: config.app.nodeEnv !== 'production',
+          debug: config.app.nodeEnv !== 'production',
+          introspection: config.app.nodeEnv !== 'production',
+          cors: config.app.cors,
+          fieldResolverEnhancers: ['guards', 'interceptors', 'filters'],
+          validationRules: [depthLimit(config.graphql.depthLimit)],
+          context: ({ req, connection }) => {
+            // Return connection context when is a Subscription
+            return connection ? { req: connection.context } : { req };
+          },
+          subscriptions: {
+            onConnect: connectionParams => {
+              return { connectionParams };
+            },
+          },
+          uploads: {
+            maxFileSize: config.graphql.maxFileSize, // 10 MB
+            maxFiles: config.graphql.maxFiles,
+          },
+        };
+      },
+    }),
     AppConfigModule,
-    AppLoggerModule,
-    //NotificationModule,
     UserModule,
   ],
 

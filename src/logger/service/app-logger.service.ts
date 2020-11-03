@@ -12,14 +12,10 @@ export class AppLoggerService implements LoggerService {
   }
 
   private loggerOptions(): winston.LoggerOptions {
-    const loggerConfig = this._configService.getLoggerConfig();
+    const loggerConfig = this._configService.logger;
 
     const transports: any[] = [];
     transports.push(new winston.transports.Console());
-
-    if (loggerConfig.inFile) {
-      transports.push(new winston.transports.File({ filename: 'app.log' }));
-    }
 
     const { combine, timestamp, label, printf, colorize } = winston.format;
     const customFormat = printf(({ level, message, timestamp }) => {

@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
-import { BaseEntity } from 'src/core/entity/base.entity';
 import { IPaginatedData } from 'src/core/interfaces/IPaginatedData';
-import { IPaginatorParams } from 'src/core/interfaces/IPaginatorParams';
 import {
   DeleteResult,
   FindManyOptions,
@@ -15,7 +12,7 @@ import { BaseInput } from '../input/base.input';
 @Injectable()
 export class BaseOrm<T> {
   /**
-   * @param repo
+   * @param _repository
    *    is TypeOrm orm for your given Entity <T>.
    *    (the intermediary object, which does all the work on the db end).
    */

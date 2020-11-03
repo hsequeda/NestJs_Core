@@ -19,9 +19,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration:generate": "ts-node node_modules/.bin/typeorm migration:generate --config ./orm.config.json --name",
-    "migration:run": "ts-node node_modules/.bin/typeorm migration:run --config ./orm.config.json",
-    "migration:revert": "ts-node node_modules/.bin/typeorm migration:revert --config ./orm.config.json"
+    "migration:generate": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:generate --config ./orm.config.json --name",
+    "migration:run": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:run --config ./orm.config.json",
+    "migration:revert": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:revert --config ./orm.config.json"
   },
   "dependencies": {
     "@apollo/gateway": "^0.19.0",
@@ -39,12 +39,13 @@
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "graphql": "^15.3.0",
+    "graphql-depth-limit": "^1.1.0",
     "graphql-scalars": "^1.4.0",
     "graphql-subscriptions": "^1.1.0",
     "graphql-tools": "^6.0.15",
     "handlebars": "^4.7.6",
     "nodemailer": "^6.4.11",
-    "pg": "^8.4.2",
+    "oracledb": "^5.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",

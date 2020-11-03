@@ -1,3 +1,31 @@
+/**
+ * Application configuration
+ *
+ * @export
+ * @interface IAppConfig
+ */
 export interface IAppConfig {
-  port?: number;
+  /**
+   * Application port
+   *
+   * @type {number}
+   * @memberof IAppConfig
+   */
+  port: number;
+
+  /**
+   * Node environtment state. Valid values: 'development', 'production', 'test', 'provision'.
+   *
+   * @type {string}
+   * @memberof IAppConfig
+   */
+  nodeEnv: string;
+
+  /**
+   * Enable or disable CORS. Default (false)
+   *
+   * @type {boolean}
+   * @memberof IAppConfig
+   */
+  cors: boolean;
 }

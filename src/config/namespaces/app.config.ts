@@ -1,0 +1,17 @@
+import { registerAs } from '@nestjs/config';
+import * as Joi from '@hapi/joi';
+
+export const appConfig = registerAs('app', () => ({
+  cors: process.env.ENABLE_CORS,
+  port: process.env.PORT,
+  nodeEnv: process.env.NODE_ENV,
+}));
+
+export const appSchema = {
+  ENABLE_CORS: Joi.boolean().default(false),
+  PORT: Joi.number().default(3000),
+  NODE_ENV: Joi.string()
+    .valid('development', 'production', 'test', 'provision')
+    .default('test'),
+};
+

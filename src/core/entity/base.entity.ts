@@ -1,8 +1,9 @@
-import { ObjectType } from '@nestjs/graphql';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 
-@ObjectType()
-@Entity()
-export class BaseEntity {
-  @PrimaryGeneratedColumn() id: number;
+@ObjectType({ isAbstract: true })
+export class AppBaseEntity extends BaseEntity {
+  @Field(() => ID)
+  @PrimaryGeneratedColumn()
+  id: number;
 }
