@@ -1,13 +1,14 @@
-import { Module, LogLevel } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppConfigModule } from './config/app-config.module';
-import { UserModule } from './user/user.module';
 import { AppConfigService } from './config/service/app-config-service';
 import { ConnectionOptions } from 'typeorm';
 import { AppResolver } from './app.resolver';
+import { UsersModule } from './users/users.module';
+import { BooksModule } from './books/books.module';
 import * as depthLimit from 'graphql-depth-limit';
 
 @Module({
@@ -52,6 +53,8 @@ import * as depthLimit from 'graphql-depth-limit';
     }),
     AppConfigModule,
     UserModule,
+    UsersModule,
+    BooksModule,
   ],
 
   controllers: [AppController],

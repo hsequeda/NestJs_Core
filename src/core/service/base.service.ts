@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
-
 import { CommandBus, QueryBus, EventBus } from '@nestjs/cqrs';
-import { FindOneQuery } from '../queries/impl/findone.query';
-import { CreateCommand } from '../commands/impl/create.command';
-import { FindQuery } from '../queries/impl/find.query';
-import { UpdateCommand } from '../commands/impl/update.command';
-import { UpdateOneCommand } from '../commands/impl/update-one.command';
-import { BaseEvent } from '../events/impl/base.event';
-import { FindPaginatedQuery } from '../queries/impl/find-paginated.query';
-import { DeleteCommand } from '../commands/impl/delete.command';
-import { DeleteOneCommand } from '../commands/impl/delete-one.command';
+import { BaseEvent } from '../events/base.event';
+import { FindQuery } from '../queries/find.query';
+import { FindOneQuery } from '../queries/findone.query';
+import { CreateCommand } from '../commands/create.command';
+import { DeleteCommand } from '../commands/delete.command';
+import { DeleteOneCommand } from '../commands/delete-one.command';
+import { UpdateOneCommand } from '../commands/update-one.command';
+import { UpdateCommand } from '../commands/update.command';
 
 @Injectable()
-export class BaseService<T> {
+export abstract class BaseService<T> {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
@@ -33,12 +31,6 @@ export class BaseService<T> {
 
   async findQuery(findQuery: FindQuery): Promise<T[]> {
     return await this.queryBus.execute(findQuery);
-  }
-
-  async findPaginatedQuery(
-    findPaginatedQuery: FindPaginatedQuery,
-  ): Promise<any> {
-    return await this.queryBus.execute(findPaginatedQuery);
   }
 
   async findOneQuery(findOneQuery: FindOneQuery): Promise<T> {
