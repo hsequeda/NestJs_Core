@@ -8,6 +8,7 @@ import { DeleteCommand } from '../commands/delete.command';
 import { DeleteOneCommand } from '../commands/delete-one.command';
 import { UpdateOneCommand } from '../commands/update-one.command';
 import { UpdateCommand } from '../commands/update.command';
+import { IPayloadResult } from '../interfaces/IPayloadResult';
 
 @Injectable()
 export abstract class BaseService<T> {
@@ -29,7 +30,7 @@ export abstract class BaseService<T> {
     this.eventBus.publish(event);
   }
 
-  async findQuery(findQuery: FindQuery): Promise<T[]> {
+  async findQuery(findQuery: FindQuery): Promise<IPayloadResult<T>> {
     return await this.queryBus.execute(findQuery);
   }
 

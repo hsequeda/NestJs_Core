@@ -1,13 +1,13 @@
+import { AggregateRoot } from '@nestjs/cqrs';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import {
   PrimaryGeneratedColumn,
-  BaseEntity,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @ObjectType({ isAbstract: true })
-export abstract class AppBaseEntity extends BaseEntity {
+export abstract class AppBaseEntity extends AggregateRoot {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: number;

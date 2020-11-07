@@ -19,7 +19,12 @@ import * as depthLimit from 'graphql-depth-limit';
       async useFactory(config: AppConfigService) {
         return {
           entities: [__dirname + '/**/entities/*.entity{.ts,.js}'],
-          ...config.database,
+          type: 'oracle',
+          username: 'test',
+          password: 'test',
+          connectString:
+            '(DESCRIPTION =(ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(Host = localhost)(Port = 1521)))( CONNECT_DATA = (SERVICE_NAME = PDB)))',
+          /* ...config.database, */
         } as ConnectionOptions;
       },
     }),
@@ -52,7 +57,6 @@ import * as depthLimit from 'graphql-depth-limit';
       },
     }),
     AppConfigModule,
-    UserModule,
     UsersModule,
     BooksModule,
   ],

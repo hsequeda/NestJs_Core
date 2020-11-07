@@ -1,23 +1,14 @@
-/* export interface StrFieldOptions { */
-/*   starts_with?: string; */
-/*   end_with?: string; */
-/*   contains?: string; */
-/* } */
+import { AggregateRoot } from '@nestjs/cqrs';
+import { IQualitativeFieldOptions } from './IQualitativeFieldOptions';
+import { IQuantitativeFieldOptions } from './IQuantitativeFieldOptions';
+import { IFieldOptions } from './IFieldOptions';
 
-/* export interface Field {} */
-/* export interface IWhere {} */
+export type OR<T> = IWhere<T>[];
 
-export interface IWhereInput {
-  AND?: [IWhereInput];
-  OR?: [IWhereInput];
-  NOT?: [IWhereInput];
-  id_in?: string[];
-  createdAt_lt?: Date;
-  createdAt_gte?: Date;
-  createdAt_lte?: Date;
-  createdAt_gt?: Date;
-  updatedAt_lt?: Date;
-  updatedAt_gte?: Date;
-  updatedAt_lte?: Date;
-  updatedAt_gt?: Date;
-}
+export type IWhere<T> = {
+  [P in keyof Omit<T, keyof AggregateRoot>]?: T[P] extends String
+    ? IQualitativeFieldOptions<T[P]>
+    : T[P] extends number | Date
+    ? IQuantitativeFieldOptions<T[P]>
+    : IFieldOptions<T[P]>;
+};
