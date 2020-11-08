@@ -47,16 +47,16 @@ export abstract class BaseService<T> {
   }
 
   async deleteOneCommand(
-    deleteOneCommand: DeleteOneCommand,
+    deleteOneCommand: DeleteOneCommand<T>,
   ): Promise<T | null> {
     return this.commandBus.execute(deleteOneCommand);
   }
 
-  async updateOneCommand(updateOneCommand: UpdateOneCommand): Promise<T> {
+  async updateOneCommand(updateOneCommand: UpdateOneCommand<T>): Promise<T> {
     return this.commandBus.execute(updateOneCommand);
   }
 
-  async updateCommand(updateCommand: UpdateCommand): Promise<any> {
+  async updateCommand(updateCommand: UpdateCommand<T>): Promise<T[]> {
     return this.commandBus.execute(updateCommand);
   }
 }

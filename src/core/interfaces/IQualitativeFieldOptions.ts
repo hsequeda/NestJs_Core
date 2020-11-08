@@ -50,3 +50,12 @@ export function getQualitativeFieldOptions<T extends String>(
   }
   return FieldOptions;
 }
+
+export enum QualitativeFieldOptionsKeys {
+  CONTAINS = 'contains',
+  NOT_CONTAINS = 'not_contains',
+  STARTS_WITH = 'starts_with',
+  NOT_STARTS_WITH = 'not_starts_with',
+  ENDS_WITH = 'ends_with',
+  NOT_ENDS_WITH = 'not_ends_with',
+}

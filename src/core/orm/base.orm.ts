@@ -20,9 +20,18 @@ import { IPayloadResult } from '../interfaces/IPayloadResult';
 import { PaginatorParams } from 'src/shared/dto/paginator.params.dto';
 import { IWhere, OR } from '../interfaces/IWhereInput';
 import { AppBaseEntity } from '../entity/base.entity';
-import { IQualitativeFieldOptions } from '../interfaces/IQualitativeFieldOptions';
-import { IQuantitativeFieldOptions } from '../interfaces/IQuantitativeFieldOptions';
-import { IFieldOptions } from '../interfaces/IFieldOptions';
+import {
+  IQualitativeFieldOptions,
+  QualitativeFieldOptionsKeys,
+} from '../interfaces/IQualitativeFieldOptions';
+import {
+  IQuantitativeFieldOptions,
+  QuantitativeFieldOptionsKeys,
+  IBetween,
+} from '../interfaces/IQuantitativeFieldOptions';
+import { IFieldOptions, FieldOptionsKeys } from '../interfaces/IFieldOptions';
+import { IWhereUnique } from '../interfaces/IWhereUniqueInput';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 /**
  * Generic class to handle the database basic interaction (CRUD).
@@ -35,25 +44,38 @@ import { IFieldOptions } from '../interfaces/IFieldOptions';
 export abstract class BaseOrm<T extends AppBaseEntity> {
   constructor(public _repository: Repository<T>) {}
 
+  /**
+   * Find all the T objects that match with the where condition and returns a paginated structure of this.
+   * If you don't pass the where parameter then return all objects.
+   * If you don't pass the paginator parameter then return all objects in the same page.
+   *
+   *
+   * @param {OR<T>} [where]
+   * @param {PaginatorParams} [paginator]
+   * @param {*} [orderBy]
+   * @returns  {Promise<IPayloadResult<T>>}
+   * @memberof BaseOrm
+   */
   async find(
-    where?: OR<T>,
+    or?: OR<T>,
     paginator?: PaginatorParams,
+    orderBy?: any,
   ): Promise<IPayloadResult<T>> {
-    const totalItems = await this._repository.count();
+    const where = this.getWhere(or);
+    const totalItems = await this._repository.count({ where });
     const limit: number =
       paginator && paginator.limit > totalItems ? paginator.limit : totalItems;
-    const totalPages: number = Math.trunc(totalItems / limit);
+    const totalPages: number =
+      totalItems !== 0 ? Math.trunc(totalItems / limit) : 1;
     const currentPage: number = paginator ? paginator.page : 1;
     const offset: number = (currentPage - 1) * limit;
-    console.log(JSON.stringify(this.getWhere(where)));
-    const test = await this._repository.find({
-      where: this.getWhere(where),
-      skip:
-        offset > totalItems ? totalItems - (totalItems % totalPages) : offset,
-      take: limit,
-    });
     return {
-      items: test,
+      items: await this._repository.find({
+        where,
+        skip:
+          offset > totalItems ? totalItems - (totalItems % totalPages) : offset,
+        take: limit,
+      }),
       totalItems,
       limit,
       currentPage,
@@ -61,94 +83,173 @@ export abstract class BaseOrm<T extends AppBaseEntity> {
     };
   }
 
-  async findOne(where: any): Promise<T> {
+  /**
+   * Returns one object T that match with the where expression.
+   *
+   * @param {*} where
+   * @returns  {Promise<T>}
+   * @memberof BaseOrm
+   */
+  async findOne(where: IWhereUnique<T>): Promise<T> {
     return this._repository.findOne({ where });
   }
 
+  /**
+   * Create an object T.
+   *
+   * @param {DeepPartial<T>} item
+   * @returns  {Promise<T>}
+   * @memberof BaseOrm
+   */
   async create(item: DeepPartial<T>): Promise<T> {
     return this._repository.save(item);
   }
 
-  async delete(criteria: any): Promise<DeleteResult> {
-    return this._repository.delete(criteria);
+  async deleteOne(where: IWhereUnique<T>): Promise<T> {
+    const entity: T = await this.findOne(where);
+    if (!entity) return null;
+    const deleteResult: DeleteResult = await this._repository
+      .createQueryBuilder()
+      .delete()
+      .where({ id: entity.id })
+      .execute();
+
+    if (deleteResult.affected === 0) return null;
+
+    return entity;
   }
 
-  async update(where: IWhere<T>, data: T | any): Promise<UpdateResult> {
-    return this._repository
+  async deleteMany(where: OR<T>): Promise<T[]> {
+    const entities: IPayloadResult<T> = await this.find(where);
+    if (entities.totalItems === 0) return null;
+    const deleteResult = await this._repository
       .createQueryBuilder()
-      .update()
-      .set(data)
+      .delete()
+      .where(
+        entities.items.map(entity => {
+          return { id: entity.id };
+        }),
+      )
       .execute();
+    if (deleteResult.affected === 0) return null;
+    return entities.items;
+  }
+
+  async updateOne(where: IWhereUnique<T>, data: DeepPartial<T>): Promise<any> {
+    const entity: T = await this.findOne(where);
+    if (!entity) return null;
+    Object.assign(entity, data);
+    return this._repository.save(entity as any);
+  }
+
+  async updateMany(
+    where: OR<T>,
+    data: QueryDeepPartialEntity<T>,
+  ): Promise<UpdateResult> {
+    const entities: IPayloadResult<T> = await this.find(where);
+    if (entities.totalItems === 0) return null;
+    const data2 = entities.items.map((entity: T) => {
+      return Object.assign(entity, data) as T;
+    });
+
+    return this._repository.save(data2 as any);
   }
 
   private getWhere(or: OR<T>): any[] {
     return or.map((where: IWhere<T>) => {
-      const data = Object.entries(where).map(([key, value]: [string, any]) => {
-        if (value.starts_with) {
-          return { [key]: this.resolveQualitativeFieldOptions(value) };
-        }
-        if (value.gte) {
-          return { [key]: this.resolveQuantitativeFieldOptions(value) };
-        }
-        return { [key]: this.resolveFieldOptions(value) };
-      });
+      const data = Object.entries(where).map(
+        ([findOptionsKey, value]: [string, any]) => {
+          if (
+            Object.keys(value).find(key =>
+              Object.keys(QualitativeFieldOptionsKeys).find(
+                enumKey => QualitativeFieldOptionsKeys[enumKey] === key,
+              ),
+            )
+          ) {
+            return {
+              [findOptionsKey]: this.resolveQualitativeFieldOptions(value),
+            };
+          }
+          if (
+            Object.keys(value).find(key =>
+              Object.keys(QuantitativeFieldOptionsKeys).find(
+                enumKey => QuantitativeFieldOptionsKeys[enumKey] === key,
+              ),
+            )
+          ) {
+            return {
+              [findOptionsKey]: this.resolveQuantitativeFieldOptions(value),
+            };
+          }
+          return { [findOptionsKey]: this.resolveFieldOptions(value) };
+        },
+      );
       return Object.assign({}, ...data);
     });
   }
 
   private resolveFieldOptions<P>(fieldOption: IFieldOptions<P>): any {
-    const [key, value]: [string, any] = Object.entries(fieldOption).pop();
+    const [key, value]: [string, P | P[]] = Object.entries(fieldOption).pop();
     switch (key) {
-      case 'is_null':
+      case FieldOptionsKeys.IS_NULL:
         return IsNull();
-      case 'any':
-        return Any(value);
-      case 'is':
+      case FieldOptionsKeys.ANY:
+        return Any(value as P[]);
+      case FieldOptionsKeys.IS:
         return Equal(value);
-      case 'not':
+      case FieldOptionsKeys.NOT:
         return Not(Equal(value));
-      case 'in':
-        return In(value);
-      case 'not_in':
-        return Not(In(value));
+      case FieldOptionsKeys.IN:
+        return In(value as P[]);
+      case FieldOptionsKeys.NOT_IN:
+        return Not(In(value as P[]));
     }
   }
 
   private resolveQuantitativeFieldOptions<Quantitative extends number | Date>(
     numFieldOption: IQuantitativeFieldOptions<Quantitative>,
   ): any {
-    const [key, value]: [string, any] = Object.entries(numFieldOption).pop();
+    const [key, value]: [
+      string,
+      Quantitative | Quantitative[] | IBetween<Quantitative>,
+    ] = Object.entries(numFieldOption).pop();
     switch (key) {
-      case 'lt':
+      case QuantitativeFieldOptionsKeys.LT:
         return LessThan(value);
-      case 'lte':
+      case QuantitativeFieldOptionsKeys.LTE:
         return LessThanOrEqual(value);
-      case 'gt':
+      case QuantitativeFieldOptionsKeys.GT:
         return MoreThan(value);
-      case 'gte':
+      case QuantitativeFieldOptionsKeys.GTE:
         return MoreThanOrEqual(value);
-      case 'between':
-        return Between(value.from, value.to);
+      case QuantitativeFieldOptionsKeys.BETWEEN:
+        return Between(
+          (value as IBetween<Quantitative>).from,
+          (value as IBetween<Quantitative>).to,
+        );
       default:
         return this.resolveFieldOptions(numFieldOption);
     }
   }
-  private resolveQualitativeFieldOptions<Qualitative extends String>(
+
+  private resolveQualitativeFieldOptions<Qualitative extends string>(
     strFieldOptions: IQualitativeFieldOptions<Qualitative>,
   ): any {
-    const [key, value]: [string, any] = Object.entries(strFieldOptions).pop();
+    const [key, value]: [string, Qualitative | Qualitative[]] = Object.entries(
+      strFieldOptions,
+    ).pop();
     switch (key) {
-      case 'contains':
+      case QualitativeFieldOptionsKeys.CONTAINS:
         return ILike(`%${value}%`);
-      case 'not_contains':
+      case QualitativeFieldOptionsKeys.NOT_CONTAINS:
         return Not(ILike(`%${value}%`));
-      case 'starts_with':
+      case QualitativeFieldOptionsKeys.STARTS_WITH:
         return ILike(`${value}%`);
-      case 'not_starts_with':
+      case QualitativeFieldOptionsKeys.NOT_STARTS_WITH:
         return Not(ILike(`${value}%`));
-      case 'ends_with':
+      case QualitativeFieldOptionsKeys.ENDS_WITH:
         return ILike(`%${value}`);
-      case 'not_ends_with':
+      case QualitativeFieldOptionsKeys.NOT_ENDS_WITH:
         return Not(ILike(`%${value}`));
       default:
         return this.resolveFieldOptions(strFieldOptions);

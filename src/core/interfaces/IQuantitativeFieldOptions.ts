@@ -62,3 +62,11 @@ export function getQuantitativeFieldOptions<T extends Number | Date>(
 
   return QuantitativeFieldOptions;
 }
+
+export enum QuantitativeFieldOptionsKeys {
+  LT = 'lt',
+  LTE = 'lte',
+  GT = 'gt',
+  GTE = 'gte',
+  BETWEEN = 'between',
+}
