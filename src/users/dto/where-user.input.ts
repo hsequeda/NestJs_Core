@@ -18,7 +18,7 @@ export class WhereUserInput implements IWhere<User> {
   @Field(() => BooleanFieldOptions)
   active?: IFieldOptions<boolean>;
   @Field(() => NumberFieldOptions)
-  id?: IQuantitativeFieldOptions<number>;
+  id?: IQualitativeFieldOptions<string>;
   @Field(() => DateFieldOptions)
   createdAt?: IQuantitativeFieldOptions<Date>;
   @Field(() => DateFieldOptions)

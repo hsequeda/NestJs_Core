@@ -8,6 +8,12 @@ import { CreateUserCommand } from './commands/impl/create.command';
 import { WhereUserInput } from './dto/where-user.input';
 import { FindUserQuery } from './queries/impl/find.query';
 import { PayloadUser } from './dto/payload-user.dto';
+import { WhereUniqueUserInput } from './dto/where-unique-user.input';
+import { DeleteOneUserCommand } from './commands/impl/delete-one.command';
+import { DeleteUserCommand } from './commands/impl/delete.command';
+import { UpdateOneUserCommand } from './commands/impl/update-one.command';
+import { UpdateOneUserInput } from './dto/updateone-user.input';
+import { UpdateUserCommand } from './commands/impl/update.command';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -22,15 +28,23 @@ export class UsersService extends BaseService<User> {
     return this.findQuery(new FindUserQuery(where));
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(where: WhereUniqueUserInput) {
+    return `This action returns a #${where} user`;
   }
 
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return `This action updates a #${id} user`;
+  updateOne(where: WhereUniqueUserInput, data: UpdateOneUserInput) {
+    return this.updateOneCommand(new UpdateOneUserCommand(where, data));
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  update(where: WhereUserInput[], data: UpdateUserInput) {
+    return this.updateCommand(new UpdateUserCommand(where, data));
+  }
+
+  removeOne(where: WhereUniqueUserInput) {
+    return this.deleteOneCommand(new DeleteOneUserCommand(where));
+  }
+
+  remove(where: WhereUserInput[]) {
+    return this.deleteCommand(new DeleteUserCommand(where));
   }
 }

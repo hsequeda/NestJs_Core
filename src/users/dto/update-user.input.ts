@@ -1,9 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateUserInput } from './create-user.input';
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { InputType, OmitType } from '@nestjs/graphql';
+import { UpdateOneUserInput } from './updateone-user.input';
 
 @InputType()
-export class UpdateUserInput extends PartialType(CreateUserInput) {
-  @Field(() => Int)
-  id: number;
-}
+export class UpdateUserInput extends OmitType(UpdateOneUserInput, [
+  'email',
+  'username',
+] as const) {}

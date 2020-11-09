@@ -2,11 +2,15 @@ import { IFieldOptions } from './IFieldOptions';
 import { Type } from '@nestjs/common';
 import { InputType, Field } from '@nestjs/graphql';
 
+// tslint:disable-next-line
+// eslint-disable-next-line
 export interface IBetween<T extends Number | Date> {
   from: T;
   to: T;
 }
 
+// tslint:disable-next-line
+// eslint-disable-next-line
 export interface IQuantitativeFieldOptions<T extends Number | Date>
   extends IFieldOptions<T> {
   is_null?: boolean;
@@ -22,6 +26,8 @@ export interface IQuantitativeFieldOptions<T extends Number | Date>
   between?: IBetween<T>;
 }
 
+// tslint:disable-next-line
+// eslint-disable-next-line
 export function getQuantitativeFieldOptions<T extends Number | Date>(
   classRef: Type<T>,
 ): any {

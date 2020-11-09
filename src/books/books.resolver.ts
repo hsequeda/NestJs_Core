@@ -3,19 +3,24 @@ import { BooksService } from './books.service';
 import { Book } from './entities/book.entity';
 import { CreateBookInput } from './dto/create-book.input';
 import { UpdateBookInput } from './dto/update-book.input';
+import { WhereBookInput } from './dto/where-book.input';
+import { PayloadBook } from './dto/payload-book.dto';
 
 @Resolver(() => Book)
 export class BooksResolver {
   constructor(private readonly booksService: BooksService) {}
 
   @Mutation(() => Book)
-  createBook(@Args('createBookInput') createBookInput: CreateBookInput) {
+  createBook(@Args('data') createBookInput: CreateBookInput) {
     return this.booksService.create(createBookInput);
   }
 
-  @Query(() => [Book], { name: 'books' })
-  findAll() {
-    return this.booksService.findAll();
+  @Query(() => PayloadBook, { name: 'books' })
+  findAll(
+    @Args('where', { type: () => [WhereBookInput], nullable: true })
+    where: WhereBookInput[],
+  ) {
+    return this.booksService.findAll(where);
   }
 
   @Query(() => Book, { name: 'book' })
@@ -24,12 +29,19 @@ export class BooksResolver {
   }
 
   @Mutation(() => Book)
-  updateBook(@Args('updateBookInput') updateBookInput: UpdateBookInput) {
-    return this.booksService.update(updateBookInput.id, updateBookInput);
+  updateBook(
+    @Args('where', { type: () => [WhereBookInput], nullable: true })
+    where: WhereBookInput[],
+    @Args('data') data: UpdateBookInput,
+  ) {
+    return this.booksService.update(where, data);
   }
 
   @Mutation(() => Book)
-  removeBook(@Args('id', { type: () => Int }) id: number) {
-    return this.booksService.remove(id);
+  removeBook(
+    @Args('where', { type: () => [WhereBookInput], nullable: true })
+    where: WhereBookInput[],
+  ) {
+    return this.booksService.remove(where);
   }
 }

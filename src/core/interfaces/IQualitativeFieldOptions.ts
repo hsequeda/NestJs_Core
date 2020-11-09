@@ -1,54 +1,18 @@
 import { IFieldOptions } from './IFieldOptions';
-import { Type } from '@nestjs/common';
-import { InputType, Field } from '@nestjs/graphql';
 
-export interface IQualitativeFieldOptions<T extends String>
-  extends IFieldOptions<T> {
+export interface IQualitativeFieldOptions extends IFieldOptions<string> {
   is_null?: boolean;
-  any?: T[];
-  is?: T;
-  not?: T;
-  in?: T[];
-  not_in?: T[];
-  contains?: T;
-  not_contains?: T;
-  starts_with?: T;
-  not_starts_with?: T;
-  ends_with?: T;
-  not_ends_with?: T;
-}
-
-export function getQualitativeFieldOptions<T extends String>(
-  classRef: Type<T>,
-): any {
-  @InputType({ isAbstract: true })
-  abstract class FieldOptions implements IQualitativeFieldOptions<T> {
-    @Field(() => Boolean, { nullable: true })
-    is_null?: boolean;
-    @Field(() => [classRef], { nullable: 'itemsAndList' })
-    any?: T[];
-    @Field(() => classRef, { nullable: true })
-    is?: T;
-    @Field(() => classRef, { nullable: true })
-    not?: T;
-    @Field(() => [classRef], { nullable: 'itemsAndList' })
-    in?: T[];
-    @Field(() => [classRef], { nullable: 'itemsAndList' })
-    not_in?: T[];
-    @Field(() => classRef, { nullable: true })
-    contains?: T;
-    @Field(() => classRef, { nullable: true })
-    not_contains?: T;
-    @Field(() => classRef, { nullable: true })
-    starts_with?: T;
-    @Field(() => classRef, { nullable: true })
-    not_starts_with?: T;
-    @Field(() => classRef, { nullable: true })
-    ends_with?: T;
-    @Field(() => classRef, { nullable: true })
-    not_ends_with?: T;
-  }
-  return FieldOptions;
+  any?: string[];
+  is?: string;
+  not?: string;
+  in?: string[];
+  not_in?: string[];
+  contains?: string;
+  not_contains?: string;
+  starts_with?: string;
+  not_starts_with?: string;
+  ends_with?: string;
+  not_ends_with?: string;
 }
 
 export enum QualitativeFieldOptionsKeys {

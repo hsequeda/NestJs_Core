@@ -5,6 +5,8 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { WhereUserInput } from './dto/where-user.input';
 import { PayloadUser } from './dto/payload-user.dto';
+import { WhereUniqueUserInput } from './dto/where-unique-user.input';
+import { UpdateOneUserInput } from './dto/updateone-user.input';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -25,17 +27,43 @@ export class UsersResolver {
   }
 
   @Query(() => User, { name: 'user' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.usersService.findOne(id);
+  findOne(
+    @Args('where', { type: () => WhereUniqueUserInput })
+    where: WhereUniqueUserInput,
+  ) {
+    return this.usersService.findOne(where);
   }
 
-  @Mutation(() => User)
-  updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
-    return this.usersService.update(updateUserInput.id, updateUserInput);
+  @Mutation(() => [User], { nullable: 'itemsAndList' })
+  updateUser(
+    @Args('where', { type: () => [WhereUserInput] })
+    where: WhereUserInput[],
+    @Args('data') data: UpdateUserInput,
+  ) {
+    return this.usersService.update(where, data);
   }
 
-  @Mutation(() => User)
-  removeUser(@Args('id', { type: () => Int }) id: number) {
-    return this.usersService.remove(id);
+  @Mutation(() => User, { nullable: true })
+  updateOneUser(
+    @Args('where', { type: () => WhereUniqueUserInput })
+    where: WhereUniqueUserInput,
+    @Args('data') data: UpdateOneUserInput,
+  ) {
+    return this.usersService.updateOne(where, data);
+  }
+
+  @Mutation(() => User, { nullable: true })
+  removeOneUser(
+    @Args('where', { type: () => WhereUniqueUserInput })
+    where: WhereUniqueUserInput,
+  ) {
+    return this.usersService.removeOne(where);
+  }
+
+  @Mutation(() => [User], { nullable: 'itemsAndList' })
+  removeUser(
+    @Args('where', { type: () => [WhereUserInput] }) where: WhereUserInput[],
+  ) {
+    return this.usersService.remove(where);
   }
 }

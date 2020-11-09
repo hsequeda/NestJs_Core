@@ -1,9 +1,7 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateBookInput } from './create-book.input';
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { InputType, OmitType } from '@nestjs/graphql';
+import { UpdateOneBookInput } from './updateone-book.input';
 
 @InputType()
-export class UpdateBookInput extends PartialType(CreateBookInput) {
-  @Field(() => Int)
-  id: number;
-}
+export class UpdateBookInput extends OmitType(UpdateOneBookInput, [
+  'name',
+] as const) {}

@@ -32,7 +32,7 @@ export interface IDataBaseConfig {
    * @type {string}
    * @memberof IDataBaseConfig
    */
-  connectionString?: string;
+  connectString?: string;
 
   /**
    * Database host. Could be included in connection string.

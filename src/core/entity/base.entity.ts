@@ -10,7 +10,7 @@ import {
 export abstract class AppBaseEntity extends AggregateRoot {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
   @Field(() => Date, { description: 'Object creation date' })
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

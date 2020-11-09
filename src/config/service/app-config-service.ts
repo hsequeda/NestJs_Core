@@ -27,8 +27,8 @@ export class AppConfigService {
     type: this._configService.get<string>('database.type'),
     username: this._configService.get<string>('database.username'),
     password: this._configService.get<string>('database.password'),
-    connectionString:
-      this._configService.get<string>('database.connectionString') ?? undefined,
+    connectString:
+      this._configService.get<string>('database.connectString') ?? undefined,
     host: this._configService.get<string>('database.host') ?? undefined,
     database: this._configService.get<string>('database.database') ?? undefined,
   };

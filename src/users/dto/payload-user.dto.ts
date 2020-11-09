@@ -1,17 +1,6 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { IPayloadResult } from 'src/core/interfaces/IPayloadResult';
+import { ObjectType } from '@nestjs/graphql';
 import { User } from '../entities/user.entity';
+import PayloadData from 'src/shared/dto/base-payload.dto';
 
 @ObjectType()
-export class PayloadUser implements IPayloadResult<User> {
-  @Field(() => [User], { nullable: 'itemsAndList' })
-  items: User[];
-  @Field(() => Int)
-  limit: number;
-  @Field(() => Int)
-  currentPage: number;
-  @Field(() => Int)
-  totalItems: number;
-  @Field(() => Int)
-  totalPages: number;
-}
+export class PayloadUser extends PayloadData(User) {}

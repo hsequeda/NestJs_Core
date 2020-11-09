@@ -9,9 +9,11 @@ import { DeleteOneCommand } from '../commands/delete-one.command';
 import { UpdateOneCommand } from '../commands/update-one.command';
 import { UpdateCommand } from '../commands/update.command';
 import { IPayloadResult } from '../interfaces/IPayloadResult';
+import { AppBaseEntity } from '../entity/base.entity';
+import { BaseInput } from '../input/base.input';
 
 @Injectable()
-export abstract class BaseService<T> {
+export abstract class BaseService<T extends AppBaseEntity> {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
@@ -38,11 +40,13 @@ export abstract class BaseService<T> {
     return this.queryBus.execute(findOneQuery);
   }
 
-  async createCommand(createCommand: CreateCommand): Promise<T> {
+  async createCommand<T extends BaseInput>(
+    createCommand: CreateCommand<T>,
+  ): Promise<T> {
     return this.commandBus.execute(createCommand);
   }
 
-  async deleteCommand(deleteCommand: DeleteCommand): Promise<any> {
+  async deleteCommand(deleteCommand: DeleteCommand<T>): Promise<any> {
     return this.commandBus.execute(deleteCommand);
   }
 

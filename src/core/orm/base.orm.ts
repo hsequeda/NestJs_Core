@@ -15,6 +15,7 @@ import {
   IsNull,
   Any,
   Equal,
+  FindManyOptions,
 } from 'typeorm';
 import { IPayloadResult } from '../interfaces/IPayloadResult';
 import { PaginatorParams } from 'src/shared/dto/paginator.params.dto';
@@ -59,25 +60,26 @@ export abstract class BaseOrm<T extends AppBaseEntity> {
   async find(
     or?: OR<T>,
     paginator?: PaginatorParams,
+    relations?: string[],
     orderBy?: any,
   ): Promise<IPayloadResult<T>> {
-    const where = this.getWhere(or);
-    const totalItems = await this._repository.count({ where });
-    const limit: number =
+    const findOptions: FindManyOptions<T> = {};
+    findOptions.where;
+    if (or) findOptions.where = this.getWhere(or);
+    const totalItems = await this._repository.count(findOptions);
+    findOptions.take =
       paginator && paginator.limit > totalItems ? paginator.limit : totalItems;
     const totalPages: number =
-      totalItems !== 0 ? Math.trunc(totalItems / limit) : 1;
+      totalItems !== 0 ? Math.trunc(totalItems / findOptions.take) : 1;
     const currentPage: number = paginator ? paginator.page : 1;
-    const offset: number = (currentPage - 1) * limit;
+    const offset: number = (currentPage - 1) * findOptions.take;
+    findOptions.skip =
+      offset > totalItems ? totalItems - (totalItems % totalPages) : offset;
+    findOptions.relations = relations;
     return {
-      items: await this._repository.find({
-        where,
-        skip:
-          offset > totalItems ? totalItems - (totalItems % totalPages) : offset,
-        take: limit,
-      }),
+      items: await this._repository.find(findOptions),
       totalItems,
-      limit,
+      limit: findOptions.take,
       currentPage,
       totalPages,
     };
@@ -102,6 +104,7 @@ export abstract class BaseOrm<T extends AppBaseEntity> {
    * @memberof BaseOrm
    */
   async create(item: DeepPartial<T>): Promise<T> {
+    console.log(item);
     return this._repository.save(item);
   }
 

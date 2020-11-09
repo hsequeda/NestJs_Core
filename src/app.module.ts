@@ -19,12 +19,7 @@ import * as depthLimit from 'graphql-depth-limit';
       async useFactory(config: AppConfigService) {
         return {
           entities: [__dirname + '/**/entities/*.entity{.ts,.js}'],
-          type: 'oracle',
-          username: 'test',
-          password: 'test',
-          connectString:
-            '(DESCRIPTION =(ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(Host = localhost)(Port = 1521)))( CONNECT_DATA = (SERVICE_NAME = PDB)))',
-          /* ...config.database, */
+          ...config.database,
         } as ConnectionOptions;
       },
     }),
@@ -50,7 +45,7 @@ import * as depthLimit from 'graphql-depth-limit';
             },
           },
           uploads: {
-            maxFileSize: config.graphql.maxFileSize, // 10 MB
+            maxFileSize: config.graphql.maxFileSize,
             maxFiles: config.graphql.maxFiles,
           },
         };
