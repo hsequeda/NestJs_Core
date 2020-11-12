@@ -1,83 +1,59 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { ScheduleModule } from '@nestjs/schedule';
 import { GraphQLModule } from '@nestjs/graphql';
-
-import { TypegooseModule } from 'nestjs-typegoose';
-
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-
-import { join } from 'path';
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
+import { AppConfigModule } from './config/app-config.module';
+import { AppConfigService } from './config/service/app-config-service';
+import { AppResolver } from './app.resolver';
+import { UsersModule } from './users/users.module';
+import { BooksModule } from './books/books.module';
+import { DatabaseModule } from './database/database.module';
+import * as depthLimit from 'graphql-depth-limit';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    TypegooseModule.forRoot(process.env.MONGODB_CONNECTION_STRING, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
-      useCreateIndex: true,
-    }),
-    ScheduleModule.forRoot(),
-
-    GraphQLModule.forRoot({
-      context: ({ req, connection }) => {
-        // Return conection context when is a Subscription
-        return connection ? { req: connection.context } : { req };
-      },
-      autoSchemaFile: 'schema.gql',
-      installSubscriptionHandlers: true,
-      debug: true,
-      introspection: true,
-      playground: true,
-      cors: false,
-      subscriptions: {
-        onConnect: (connectionParams) => {
-          return { connectionParams };
-        },
-      },
-      uploads: {
-        maxFileSize: 10000000, // 10 MB
-        maxFiles: 2,
-      },
-    }),
-
-    MailerModule.forRootAsync({
-      useFactory: () => ({
-        transport: {
-          host: process.env.SMTP_HOST,
-          port: Number(process.env.SMTP_PORT),
-          tls: {
-            rejectUnauthorized: false,
+    DatabaseModule,
+    GraphQLModule.forRootAsync({
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      async useFactory(config: AppConfigService) {
+        return {
+          autoSchemaFile: config.graphql.schema,
+          playground: config.app.nodeEnv !== 'production',
+          debug: config.app.nodeEnv !== 'production',
+          introspection: config.app.nodeEnv !== 'production',
+          cors: config.app.cors,
+          fieldResolverEnhancers: ['guards', 'interceptors', 'filters'],
+          validationRules: [depthLimit(config.graphql.depthLimit)],
+          context: ({ req, connection }) => {
+            // Return connection context when is a Subscription
+            return connection ? { req: connection.context } : { req };
           },
-          secure: Number(process.env.SMTP_PORT) === 465 ? true : false,
-          auth: {
-            user: process.env.SMTP_EMAIL,
-            pass: process.env.SMTP_PASSWORD,
+          subscriptions: {
+            onConnect: connectionParams => {
+              return { connectionParams };
+            },
           },
-        },
-        defaults: {
-          from: `APP-NAME <${process.env.SMTP_EMAIL}>`,
-        },
-        template: {
-          dir: join(__dirname, '..', 'templates'),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
+          uploads: {
+            maxFileSize: config.graphql.maxFileSize,
+            maxFiles: config.graphql.maxFiles,
           },
-        },
-      }),
+        };
+      },
     }),
-    UserModule,
-    AuthModule,
+    AppConfigModule,
+    UsersModule,
+    BooksModule,
+    DatabaseModule,
   ],
 
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppResolver],
 })
-export class AppModule {}
+export class AppModule {
+  static port: number;
+
+  constructor(private readonly _configService: AppConfigService) {
+    AppModule.port = this._configService.app.port;
+  }
+}
