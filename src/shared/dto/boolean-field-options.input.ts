@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IFieldOptions } from 'src/core/interfaces/IFieldOptions';
+import { IFieldOptions } from '../modules/database/interfaces/IFieldOptions';
 
 /**
  * Options to filter by a boolean object. You only can use a field at a time.

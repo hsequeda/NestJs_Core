@@ -2,12 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, ValidationError, Logger } from '@nestjs/common';
 import { UserInputError } from 'apollo-server-express';
-import { AppConfigService } from './config/service/app-config-service';
-import { AppConfigModule } from './config/app-config.module';
+import { AppConfigService } from './shared/modules/config/service/app-config-service';
+import { AppConfigModule } from './shared/modules/config/app-config.module';
 
 async function bootstrap() {
   const auxApp = await NestFactory.createApplicationContext(AppConfigModule);
   const logLevel = auxApp.get(AppConfigService).app.logLevel;
+  const port = auxApp.get(AppConfigService).app.port;
   await auxApp.close();
 
   const app = await NestFactory.create(AppModule, {
@@ -26,7 +27,7 @@ async function bootstrap() {
       },
     }),
   );
-  await app.listen(configService.app.port);
+  await app.listen(port);
   Logger.log(
     `🚀 Server running on port :${configService.app.port}`,
     'NestApplication',

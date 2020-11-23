@@ -1,6 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { ClassType } from 'type-graphql';
-import { IPayloadResult } from 'src/core/interfaces/IPayloadResult';
+import { IPayloadResult } from '../modules/database/interfaces/IPayloadResult';
 
 /**
  * Returns a payload for the class passed by parameter.

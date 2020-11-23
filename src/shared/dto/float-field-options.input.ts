@@ -2,7 +2,7 @@ import { InputType, Field, Float } from '@nestjs/graphql';
 import {
   IBetween,
   IQuantitativeFieldOptions,
-} from 'src/core/interfaces/IQuantitativeFieldOptions';
+} from '../modules/database/interfaces/IQuantitativeFieldOptions';
 
 @InputType()
 export class BetweenFloat implements IBetween<number> {

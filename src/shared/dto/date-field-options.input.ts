@@ -1,8 +1,8 @@
 import { InputType, Field } from '@nestjs/graphql';
 import {
-  IQuantitativeFieldOptions,
   IBetween,
-} from 'src/core/interfaces/IQuantitativeFieldOptions';
+  IQuantitativeFieldOptions,
+} from '../modules/database/interfaces/IQuantitativeFieldOptions';
 
 @InputType()
 export class BetweenDate implements IBetween<Date> {

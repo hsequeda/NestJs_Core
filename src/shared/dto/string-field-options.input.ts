@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IQualitativeFieldOptions } from 'src/core/interfaces/IQualitativeFieldOptions';
+import { IQualitativeFieldOptions } from '../modules/database/interfaces/IQualitativeFieldOptions';
 
 /**
  * Options to filter by a String object. You only can use a field at a time.
