@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { OrientationModule } from './orientation/orientation.module';
 
-@Module({})
+@Module({
+  imports: [OrientationModule]
+})
 export class QualityModule {}
