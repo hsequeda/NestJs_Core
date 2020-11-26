@@ -22,7 +22,10 @@ export class Guard {
         };
   }
 
-  public static allAtLeast(numChars: number, args: IGuardArgument[]) {
+  public static allAtLeast(
+    numChars: number,
+    args: IGuardArgument[],
+  ): IGuardResult {
     for (const arg of args) {
       const result = this.againstAtLeast({ numChars, ...arg });
       if (!result.succeeded) return result;
@@ -47,7 +50,10 @@ export class Guard {
         };
   }
 
-  public static allAtMost(numChars: number, args: IGuardArgument[]) {
+  public static allAtMost(
+    numChars: number,
+    args: IGuardArgument[],
+  ): IGuardResult {
     for (const arg of args) {
       const result = this.againstAtMost({ numChars, ...arg });
       if (!result.succeeded) return result;
@@ -73,7 +79,7 @@ export class Guard {
   }
 
   public static againstNullOrUndefined(
-    argument: any,
+    argument: unknown,
     argumentPath: string,
   ): IGuardResult {
     if (argument === null || argument === undefined) {
@@ -174,7 +180,10 @@ export class Guard {
     }
   }
 
-  public static isListOfStrings(list: any, argumentPath: string): IGuardResult {
+  public static isListOfStrings(
+    list: unknown,
+    argumentPath: string,
+  ): IGuardResult {
     let failingResult: IGuardResult | null = null;
 
     if (!Array.isArray(list)) {
@@ -215,7 +224,7 @@ export class Guard {
     return getSuccessResult(args[0].argumentPath);
   }
 
-  public static isString(value: any, argumentPath: string): IGuardResult {
+  public static isString(value: unknown, argumentPath: string): IGuardResult {
     if (typeof value === 'string' || value instanceof String) {
       return getSuccessResult(argumentPath);
     }
@@ -234,7 +243,7 @@ export class Guard {
     return getSuccessResult(args[0].argumentPath);
   }
 
-  public static isNumber(value: any, argumentPath: string): IGuardResult {
+  public static isNumber(value: unknown, argumentPath: string): IGuardResult {
     if (typeof value === 'number') {
       return getSuccessResult(argumentPath);
     }

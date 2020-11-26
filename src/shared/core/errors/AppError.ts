@@ -9,7 +9,7 @@ import { IResultError } from '../interfaces/IResultError';
  */
 export namespace AppError {
   export class UnexpectedError extends Result<UnknownError> {
-    public constructor(err: any) {
+    public constructor(err: unknown) {
       super(false, {
         message: 'unexpectedServerError',
         error: err,
@@ -18,7 +18,7 @@ export namespace AppError {
       Logger.error(err);
     }
 
-    public static create(err: any) {
+    public static create(err: unknown): UnexpectedError {
       return new UnexpectedError(err);
     }
   }

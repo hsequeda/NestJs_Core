@@ -14,12 +14,18 @@ export const graphqlProvider = GraphQLModule.forRootAsync({
       cors: config.app.cors,
       fieldResolverEnhancers: ['guards', 'interceptors', 'filters'],
       validationRules: [depthLimit(config.graphql.depthLimit)],
-      context: ({ req, connection }) => {
+      context: ({
+        req,
+        connection,
+      }: {
+        req: Request;
+        connection: any;
+      }): { req: Request } => {
         // Return connection context when is a Subscription
         return connection ? { req: connection.context } : { req };
       },
       subscriptions: {
-        onConnect: connectionParams => {
+        onConnect: (connectionParams: unknown) => {
           return { connectionParams };
         },
       },

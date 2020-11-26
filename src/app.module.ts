@@ -1,7 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AppResolver } from './app.resolver';
 import { QualityModule } from './quality/quality.module';
 import { StpModule } from './stp/stp.module';
 import { InventoryModule } from './inventory/inventory.module';
@@ -16,8 +13,5 @@ import { GraphqlModule } from './shared/modules/graphql/graphql.module';
     InventoryModule,
     GraphqlModule,
   ],
-
-  controllers: [AppController],
-  providers: [AppService, AppResolver],
 })
 export class AppModule {}

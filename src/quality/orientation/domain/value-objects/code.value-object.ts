@@ -1,26 +1,24 @@
 import { ValueObject } from 'src/shared/domain/value-object.abstract';
-import { Guard } from 'src/shared/core/Guard';
 import { Result } from 'src/shared/core/Result';
+import { Guard } from 'src/shared/core/Guard';
 
-interface DescriptionProps {
+interface CodeProps {
   value: string;
 }
 
-export class Description extends ValueObject<DescriptionProps> {
-  static maxLength = 40;
+export class Code extends ValueObject<CodeProps> {
+  static maxLength = 4;
 
-  get value() {
+  get value(): string {
     return this.props.value;
   }
 
-  private constructor(props: DescriptionProps) {
+  private constructor(props: CodeProps) {
     super(props);
   }
-  public static create(props: DescriptionProps): Result<Description> {
-    const nullGuardResult = Guard.againstNullOrUndefined(
-      props.value,
-      'description',
-    );
+
+  public static create(props: CodeProps): Result<Code> {
+    const nullGuardResult = Guard.againstNullOrUndefined(props.value, 'code');
     if (!nullGuardResult.succeeded) {
       return Result.fail(nullGuardResult);
     }
@@ -28,13 +26,13 @@ export class Description extends ValueObject<DescriptionProps> {
     const minGuardResult = Guard.againstAtMost({
       numChars: this.maxLength,
       argument: props.value,
-      argumentPath: 'description',
+      argumentPath: 'code',
     });
 
     if (!minGuardResult.succeeded) {
       return Result.fail(minGuardResult);
     }
 
-    return Result.ok(new Description(props));
+    return Result.ok(new Code(props));
   }
 }
