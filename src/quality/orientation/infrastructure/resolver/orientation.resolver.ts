@@ -1,4 +1,9 @@
-import { Resolver } from '@nestjs/graphql';
+import { Query, Resolver } from '@nestjs/graphql';
 
 @Resolver()
-export class OrientationResolver {}
+export class OrientationResolver {
+  @Query(()=> String,{})
+  create(){
+    return "Create Orientation"
+  }
+}

@@ -1,8 +1,8 @@
 import { IOrientation } from './IOrientation';
 import { QualitativeFieldOptions } from 'src/shared/modules/database/types/IQualitativeFieldOptions';
 import { FieldOptions } from 'src/shared/modules/database/types/IFieldOptions';
-import { PaginatorParams } from 'src/shared/dto/paginator.params.dto';
-import { PayloadResult } from 'src/shared/core/PayloadResult';
+import { PaginatorParams } from '../../../../shared/core/PaginatorParams';
+import { PayloadResult } from '../../../../shared/core/PayloadResult';
 
 interface WhereOrientation {
   id?: FieldOptions<string | number>;
