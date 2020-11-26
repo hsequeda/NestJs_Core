@@ -1,12 +1,8 @@
-import {
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { IEntity } from '../interfaces/IEntity';
+import { CreateDateColumn, UpdateDateColumn, PrimaryColumn } from 'typeorm';
+import { IPersistentEntity } from '../interfaces/IEntity';
 
-export abstract class PersistentEntity implements IEntity {
-  @PrimaryGeneratedColumn('uuid')
+export abstract class PersistentEntity implements IPersistentEntity {
+  @PrimaryColumn()
   id: string;
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

@@ -1,0 +1,3 @@
+interface IUseCaseError {
+  message: string;
+}
