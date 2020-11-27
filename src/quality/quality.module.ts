@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { OrientationModule } from './orientation/orientation.module';
+import { ProofParametrizationModule } from './proof-parametrization/proof-parametrization.module';
 
 @Module({
-  imports: [OrientationModule],
-  exports: [OrientationModule]
+  imports: [ProofParametrizationModule],
+  exports: [ProofParametrizationModule],
 })
 export class QualityModule {}
