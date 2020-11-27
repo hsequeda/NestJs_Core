@@ -4,6 +4,7 @@ import { StpModule } from './stp/stp.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { AppConfigModule } from './shared/modules/config/app-config.module';
 import { GraphqlModule } from './shared/modules/graphql/graphql.module';
+import { CompanyModule } from './shared/modules/company/company.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { GraphqlModule } from './shared/modules/graphql/graphql.module';
     StpModule,
     InventoryModule,
     GraphqlModule,
+    CompanyModule,
   ],
 })
 export class AppModule {}
