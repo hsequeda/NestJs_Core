@@ -1,6 +1,4 @@
-interface IUnknownError {
-  message: string;
-}
+import { IUnknownError } from '../interfaces/IUnknownError';
 
 export abstract class UnknownError implements IUnknownError {
   protected constructor(
