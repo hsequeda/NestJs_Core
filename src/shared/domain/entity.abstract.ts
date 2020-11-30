@@ -5,7 +5,7 @@ export abstract class DomainEntity<T> {
   public readonly props: T;
 
   protected constructor(props: T, id?: UniqueEntityID) {
-    this._id = id;
+    this._id = id ? id : new UniqueEntityID();
     this.props = props;
   }
 
