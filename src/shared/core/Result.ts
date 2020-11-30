@@ -3,7 +3,7 @@ import { IResultError } from './interfaces/IResultError';
 export class Result<R, E = IResultError> {
   public isSuccess: boolean;
   public isFailure: boolean;
-  public error: E;
+  private error: E;
   private _value: R;
 
   protected constructor(isSuccess: boolean, error?: E, value?: R) {

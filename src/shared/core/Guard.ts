@@ -9,6 +9,16 @@ const getSuccessResult = (argumentPath: string): IGuardResult => ({
 });
 
 export class Guard {
+  /**
+   * Determine if the actual value is greather than the minimal value.
+   *
+   * @static
+   * @param {number} minValue
+   * @param {number} actualValue
+   * @param {string} argumentPath
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static greaterThan(
     minValue: number,
     actualValue: number,
@@ -18,13 +28,22 @@ export class Guard {
       ? getSuccessResult(argumentPath)
       : {
           succeeded: false,
-          message: `${argumentPath}.shouldBeGreaterThan${minValue}`,
+          message: `${argumentPath} should be greater than ${minValue}`,
         };
   }
 
+  /**
+   * Determines whether or not the number of elements of all arguments in the sequence are greater than or equal the given number.
+   *
+   * @static
+   * @param {number} numChars
+   * @param {GuardArgumentCollection} args
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static allAtLeast(
     numChars: number,
-    args: IGuardArgument[],
+    args: GuardArgumentCollection,
   ): IGuardResult {
     for (const arg of args) {
       const result = this.againstAtLeast({ numChars, ...arg });
@@ -33,6 +52,22 @@ export class Guard {
     return getSuccessResult(args[0].argumentPath);
   }
 
+  /**
+   * Determines whether or not the number of elements in the sequence is greater than or equal to the given number.
+   *
+   * @static
+   * @param {{
+   *     numChars: number;
+   *     argument: string;
+   *     argumentPath: string;
+   *   }} {
+   *     argumentPath,
+   *     numChars,
+   *     argument,
+   *   }
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static againstAtLeast({
     argumentPath,
     numChars,
@@ -50,9 +85,18 @@ export class Guard {
         };
   }
 
+  /**
+   * Determines whether or not the number of elements of all arguments in the sequence are lesser than or equal the given number.
+   *
+   * @static
+   * @param {number} numChars
+   * @param {IGuardArgument[]} args
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static allAtMost(
     numChars: number,
-    args: IGuardArgument[],
+    args: GuardArgumentCollection,
   ): IGuardResult {
     for (const arg of args) {
       const result = this.againstAtMost({ numChars, ...arg });
@@ -61,6 +105,22 @@ export class Guard {
     return getSuccessResult(args[0].argumentPath);
   }
 
+  /**
+   * Determines whether or not the number of elements in the sequence is lesser than or equal to the given number.
+   *
+   * @static
+   * @param {{
+   *     numChars: number;
+   *     argument: string;
+   *     argumentPath: string;
+   *   }} {
+   *     numChars,
+   *     argumentPath,
+   *     argument,
+   *   }
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static againstAtMost({
     numChars,
     argumentPath,
@@ -74,10 +134,19 @@ export class Guard {
       ? getSuccessResult(argumentPath)
       : {
           succeeded: false,
-          message: `${argumentPath}.shouldBeLowerThan${numChars}chars`,
+          message: `${argumentPath} should be lower than ${numChars} chars`,
         };
   }
 
+  /**
+   * Determines if value isn't null or undefined.
+   *
+   * @static
+   * @param {unknown} argument
+   * @param {string} argumentPath
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static againstNullOrUndefined(
     argument: unknown,
     argumentPath: string,
@@ -85,13 +154,21 @@ export class Guard {
     if (argument === null || argument === undefined) {
       return {
         succeeded: false,
-        message: `${argumentPath}.shouldBeDefined`,
+        message: `${argumentPath} should be defined`,
       };
     } else {
       return getSuccessResult(argumentPath);
     }
   }
 
+  /**
+   * Determines if all arguments aren't null or undefined.
+   *
+   * @static
+   * @param {GuardArgumentCollection} args
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static againstNullOrUndefinedBulk(
     args: GuardArgumentCollection,
   ): IGuardResult {
@@ -105,6 +182,22 @@ export class Guard {
     return getSuccessResult(args[0].argumentPath);
   }
 
+  /**
+   * Determines if value exist in valid values list.
+   *
+   * @static
+   * @param {{
+   *     value: any;
+   *     validValues: any[];
+   *     argumentPath: string;
+   *   }} {
+   *     value,
+   *     validValues,
+   *     argumentPath,
+   *   }
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static isOneOf({
     value,
     validValues,
@@ -126,11 +219,29 @@ export class Guard {
     } else {
       return {
         succeeded: false,
-        message: `${argumentPath}.isInvalidType`,
+        message: `${argumentPath} is invalid type`,
       };
     }
   }
 
+  /**
+   * Determines if value is between min and max value.
+   *
+   * @static
+   * @param {{
+   *     num: number;
+   *     min: number;
+   *     max: number;
+   *     argumentPath: string;
+   *   }} {
+   *     argumentPath,
+   *     max,
+   *     min,
+   *     num,
+   *   }
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static inRange({
     argumentPath,
     max,
@@ -146,13 +257,29 @@ export class Guard {
     if (!isInRange) {
       return {
         succeeded: false,
-        message: `${argumentPath}.shouldBeWithinRange${min}to${max}`,
+        message: `${argumentPath} should be within range ${min} to ${max}`,
       };
     } else {
       return getSuccessResult(argumentPath);
     }
   }
 
+  /**
+   * Determines if all arguments are between min and max values.
+   *
+   * @static
+   * @param {{
+   *     min: number;
+   *     max: number;
+   *     args: IGuardArgument[];
+   *   }} {
+   *     min,
+   *     max,
+   *     args,
+   *   }
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static allInRange({
     min,
     max,
@@ -180,6 +307,15 @@ export class Guard {
     }
   }
 
+  /**
+   * Determines if list is of type string[].
+   *
+   * @static
+   * @param {unknown} list
+   * @param {string} argumentPath
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static isListOfStrings(
     list: unknown,
     argumentPath: string,
@@ -189,14 +325,14 @@ export class Guard {
     if (!Array.isArray(list)) {
       return {
         succeeded: false,
-        message: `${argumentPath}.shouldBeArray`,
+        message: `${argumentPath} should be array`,
       };
     }
 
     if (list.length === 0) {
       return {
         succeeded: false,
-        message: `${argumentPath}.shouldBeNotEmpty`,
+        message: `${argumentPath} should be not empty`,
       };
     }
 
@@ -210,13 +346,21 @@ export class Guard {
     if (failingResult) {
       return {
         succeeded: false,
-        message: `${argumentPath}.allItemsShouldBeTypeOfString`,
+        message: `${argumentPath} all items should be type of string`,
       };
     }
     return getSuccessResult(argumentPath);
   }
 
-  public static isStringBulk(args: GuardArgumentCollection): IGuardResult {
+  /**
+   * Determines if all values are of type 'string'.
+   *
+   * @static
+   * @param {GuardArgumentCollection} args
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
+  public static AllisString(args: GuardArgumentCollection): IGuardResult {
     for (const arg of args) {
       const result = this.isString(arg.argument, arg.argumentPath);
       if (!result.succeeded) return result;
@@ -224,6 +368,15 @@ export class Guard {
     return getSuccessResult(args[0].argumentPath);
   }
 
+  /**
+   * Determines if value is of type 'string'.
+   *
+   * @static
+   * @param {unknown} value
+   * @param {string} argumentPath
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static isString(value: unknown, argumentPath: string): IGuardResult {
     if (typeof value === 'string' || value instanceof String) {
       return getSuccessResult(argumentPath);
@@ -231,10 +384,18 @@ export class Guard {
 
     return {
       succeeded: false,
-      message: `${argumentPath}.shouldBeString`,
+      message: `${argumentPath} should be string`,
     };
   }
 
+  /**
+   * Determines if all values are of type 'number'.
+   *
+   * @static
+   * @param {GuardArgumentCollection} args
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static allIsNumber(args: GuardArgumentCollection): IGuardResult {
     for (const arg of args) {
       const result = this.isNumber(arg.argument, arg.argumentPath);
@@ -243,13 +404,22 @@ export class Guard {
     return getSuccessResult(args[0].argumentPath);
   }
 
+  /**
+   * Determines if value is of type 'number'.
+   *
+   * @static
+   * @param {unknown} value
+   * @param {string} argumentPath
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
   public static isNumber(value: unknown, argumentPath: string): IGuardResult {
     if (typeof value === 'number') {
       return getSuccessResult(argumentPath);
     }
     return {
       succeeded: false,
-      message: `${argumentPath}.shouldBeNumber`,
+      message: `${argumentPath} should be number`,
     };
   }
 }
