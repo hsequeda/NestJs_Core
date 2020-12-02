@@ -33,6 +33,74 @@ export class Guard {
   }
 
   /**
+   * Determine if the actual value is greather than or equal to the minimal value.
+   *
+   * @static
+   * @param {number} minValue
+   * @param {number} actualValue
+   * @param {string} argumentPath
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
+  public static greaterThanEqual(
+    minValue: number,
+    actualValue: number,
+    argumentPath: string,
+  ): IGuardResult {
+    return actualValue >= minValue
+      ? getSuccessResult(argumentPath)
+      : {
+          succeeded: false,
+          message: `${argumentPath} should be greater than ${minValue}`,
+        };
+  }
+
+  /**
+   * Determine if the actual value is lesser than the max value.
+   *
+   * @static
+   * @param {number} maxValue
+   * @param {number} actualValue
+   * @param {string} argumentPath
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
+  public static lesserThan(
+    maxValue: number,
+    actualValue: number,
+    argumentPath: string,
+  ): IGuardResult {
+    return actualValue < maxValue
+      ? getSuccessResult(argumentPath)
+      : {
+          succeeded: false,
+          message: `${argumentPath} should be lesser than ${maxValue}`,
+        };
+  }
+
+  /**
+   * Determine if the actual value is greather than or equal to the minimal value.
+   *
+   * @static
+   * @param {number} minValue
+   * @param {number} actualValue
+   * @param {string} argumentPath
+   * @returns  {IGuardResult}
+   * @memberof Guard
+   */
+  public static lesserThanEqual(
+    maxValue: number,
+    actualValue: number,
+    argumentPath: string,
+  ): IGuardResult {
+    return actualValue <= maxValue
+      ? getSuccessResult(argumentPath)
+      : {
+          succeeded: false,
+          message: `${argumentPath} should be lesser than ${maxValue}`,
+        };
+  }
+  /**
    * Determines whether or not the number of elements of all arguments in the sequence are greater than or equal the given number.
    *
    * @static
