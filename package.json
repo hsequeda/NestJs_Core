@@ -19,7 +19,6 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration:generate": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:generate --config ./orm.config.json --name",
     "migration:run": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:run --config ./orm.config.json",
     "migration:revert": "ts-node -r tsconfig-paths/register node_modules/.bin/typeorm migration:revert --config ./orm.config.json"
@@ -45,6 +44,7 @@
     "graphql-subscriptions": "^1.1.0",
     "graphql-tools": "^6.0.15",
     "handlebars": "^4.7.6",
+    "lodash": "^4.17.20",
     "nodemailer": "^6.4.11",
     "oracledb": "^5.0.0",
     "reflect-metadata": "^0.1.13",
@@ -61,6 +61,7 @@
     "@types/express": "^4.17.3",
     "@types/hapi__joi": "^17.1.6",
     "@types/jest": "25.2.3",
+    "@types/lodash": "^4.14.165",
     "@types/node": "^13.9.1",
     "@types/supertest": "^2.0.8",
     "@typescript-eslint/eslint-plugin": "3.0.2",
