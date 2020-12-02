@@ -14,11 +14,11 @@ export type FieldOptions<T> = {
   notIn?: T[];
 };
 
-/* export enum FieldOptionsKeys { */
-/*   IS_NULL = 'isNull', */
-/*   ANY = 'any', */
-/*   IS = 'is', */
-/*   NOT = 'not', */
-/*   IN = 'in', */
-/*   NOT_IN = 'notIn', */
-/* } */
+export enum FieldOptionsKeys {
+  IS_NULL = 'isNull',
+  ANY = 'any',
+  IS = 'is',
+  NOT = 'not',
+  IN = 'in',
+  NOT_IN = 'notIn',
+}

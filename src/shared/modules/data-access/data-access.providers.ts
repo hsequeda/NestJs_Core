@@ -1,3 +1,3 @@
 import { typeOrmProvider } from './typeorm/provider';
 
-export const DatabaseProviders = [typeOrmProvider];
+export const DataAccessProviders = [typeOrmProvider];

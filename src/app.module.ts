@@ -5,6 +5,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { AppConfigModule } from './shared/modules/config/app-config.module';
 import { GraphqlModule } from './shared/modules/graphql/graphql.module';
 import { CompanyModule } from './shared/modules/company/company.module';
+import { DataAccessModule } from './shared/modules/data-access/data-access.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { CompanyModule } from './shared/modules/company/company.module';
     StpModule,
     InventoryModule,
     GraphqlModule,
+    DataAccessModule,
     CompanyModule,
   ],
 })

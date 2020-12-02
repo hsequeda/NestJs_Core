@@ -7,7 +7,7 @@ import { FieldOptions } from './IFieldOptions';
  * @type IBetween
  * @template T
  */
-export type IBetween<T extends number | Date> = {
+export type IBetween<T = number | Date> = {
   from: T;
   to: T;
 };
@@ -20,14 +20,18 @@ export type IBetween<T extends number | Date> = {
  * @extends {IFieldOptions<T>}
  * @template T
  */
-export type IQuantitativeFieldOptions<T extends number | Date> = FieldOptions<
-  T
-> & { lt?: T; lte?: T; gt?: T; gte?: T; between?: IBetween<T> };
+export type IQuantitativeFieldOptions<T = number | Date> = FieldOptions<T> & {
+  lt?: T;
+  lte?: T;
+  gt?: T;
+  gte?: T;
+  between?: IBetween<T>;
+};
 
-/* export enum QuantitativeFieldOptionsKeys { */
-/*   LT = 'lt', */
-/*   LTE = 'lte', */
-/*   GT = 'gt', */
-/*   GTE = 'gte', */
-/*   BETWEEN = 'between', */
-/* } */
+export enum QuantitativeFieldOptionsKeys {
+  LT = 'lt',
+  LTE = 'lte',
+  GT = 'gt',
+  GTE = 'gte',
+  BETWEEN = 'between',
+}
