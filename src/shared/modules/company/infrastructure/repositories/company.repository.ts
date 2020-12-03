@@ -1,15 +1,21 @@
 import {
   ICompanyRepository,
-  OrderCompany,
-  WhereCompany,
+  OrderCompanyEnum,
   WhereUniqueCompany,
+  WhereCompany,
 } from '../../domain/interfaces/IRepository';
 import { PaginatorParams } from 'src/shared/core/PaginatorParams';
-import { ICompany } from '../../domain/interfaces/ICompany';
-import { PayloadResult } from 'src/shared/core/PayloadResult';
+import {
+  PayloadResult,
+  defaultPayloadResult,
+} from '../../../../core/PayloadResult';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CompanyEntity } from '../entities/company.entity';
+import { Company } from '../../domain/entities/company.entity';
+import { CompanyMap } from '../mapper/company.mapper';
+import { TypeORMDataAccessUtils } from 'src/shared/modules/data-access/typeorm/field-options.parser';
+import { has, isNil } from 'lodash';
 
 export class CompanyRepository implements ICompanyRepository {
   constructor(
@@ -17,48 +23,132 @@ export class CompanyRepository implements ICompanyRepository {
     private readonly _companyRepository: Repository<CompanyEntity>,
   ) {}
 
-  async find(where?: WhereCompany[]): Promise<ICompany[]> {
-    throw new Error('Method not implemented.');
+  async existCompany(where: WhereCompany): Promise<boolean> {
+    const rawWhere = this.toRawWhere(where);
+    const companyCount = await this._companyRepository.count({
+      where: rawWhere,
+    });
+    return companyCount > 0;
   }
 
-  async findOne(whereUnique: WhereUniqueCompany): Promise<ICompany> {
-    const company = await this._companyRepository.findOne({
-      id: whereUnique.id,
+  async findAllCompanies(where?: WhereCompany): Promise<Company[]> {
+    const rawWhere = this.toRawWhere(where);
+    const companies = await this._companyRepository.find({
+      where: rawWhere,
     });
 
-    if (!company) {
-      throw new Error('Company not found');
-    }
-
-    return company;
+    return companies.map(company => {
+      return CompanyMap.PersistenttoDomain(company);
+    });
   }
 
-  async paginatedFind(
+  async findOneCompany(whereUnique: WhereUniqueCompany): Promise<Company> {
+    const company = await this._companyRepository.findOne({
+      active: true,
+      ...whereUnique,
+    });
+    if (isNil(company)) throw new Error('Company not found');
+    return CompanyMap.PersistenttoDomain(company);
+  }
+
+  async paginatedFindCompany(
     paginatorParams: PaginatorParams,
-    where?: WhereCompany[],
-    order?: OrderCompany,
-  ): Promise<PayloadResult<ICompany>> {
-    throw new Error('Method not implemented.');
+    where?: WhereCompany,
+    orderEnum?: OrderCompanyEnum,
+  ): Promise<PayloadResult<Company>> {
+    const rawWhere = this.toRawWhere(where);
+    const orderBy = this.getCompanyOrderByEnum(orderEnum);
+    const companyQty = await this._companyRepository.count({
+      where: rawWhere,
+    });
+    if (companyQty === 0) return defaultPayloadResult;
+    const pageLimit: number =
+      paginatorParams.pageLimit < companyQty
+        ? paginatorParams.pageLimit
+        : companyQty;
+    const totalPages: number = Math.trunc(companyQty / pageLimit);
+    const currentPage: number =
+      paginatorParams.pageNum < totalPages
+        ? paginatorParams.pageNum
+        : totalPages;
+
+    const pageNum: number =
+      paginatorParams.pageNum < totalPages
+        ? paginatorParams.pageNum
+        : totalPages;
+
+    const findOffset = pageLimit * pageNum;
+
+    const persistentCompanies = await this._companyRepository.find({
+      where: rawWhere,
+      order: orderBy,
+      skip: findOffset,
+      take: pageLimit,
+    });
+
+    return {
+      items: persistentCompanies.map(persistentCompany =>
+        CompanyMap.PersistenttoDomain(persistentCompany),
+      ),
+      totalItems: companyQty,
+      limit: pageLimit,
+      currentPage,
+      totalPages,
+    };
   }
 
-  async create(company: ICompany): Promise<void> {
-    await this._companyRepository
-      .create({
-        id: company.id,
-        code: company.code,
-        name: company.name,
-      })
-      .save();
-  }
-
-  async update(
-    where: WhereUniqueCompany,
-    data: Partial<ICompany>,
-  ): Promise<void> {
-    throw new Error('Method not implemented.');
+  async save(company: Company): Promise<void> {
+    const partialCompanyEntity = CompanyMap.DomaintoPersitent(company);
+    await this._companyRepository.create(partialCompanyEntity).save();
   }
 
   async delete(where: WhereUniqueCompany): Promise<void> {
-    throw new Error('Method not implemented.');
+    await this._companyRepository.update(where, { active: false });
+  }
+
+  private toRawWhere(where: WhereCompany): any {
+    const rawWhere: any = {};
+    if (has(where, 'id'))
+      rawWhere.id = TypeORMDataAccessUtils.parseFieldOption(where.id);
+    if (has(where, 'code'))
+      rawWhere.code = TypeORMDataAccessUtils.parseQualitativeFieldOption(
+        where.code,
+      );
+    if (has(where, 'name'))
+      rawWhere.name = TypeORMDataAccessUtils.parseQualitativeFieldOption(
+        where.name,
+      );
+
+    return { active: true, ...rawWhere };
+  }
+
+  private getCompanyOrderByEnum(
+    order?: OrderCompanyEnum,
+  ): {
+    [P in 'code' | 'id' | 'name' | 'updatedAt' | 'createdAt']?: 'ASC' | 'DESC';
+  } {
+    if (!order) return { createdAt: 'ASC' };
+    switch (order) {
+      case OrderCompanyEnum.ID_ASC:
+        return { id: 'ASC' };
+      case OrderCompanyEnum.ID_DESC:
+        return { id: 'DESC' };
+      case OrderCompanyEnum.CODE_ASC:
+        return { code: 'ASC' };
+      case OrderCompanyEnum.CODE_DESC:
+        return { code: 'DESC' };
+      case OrderCompanyEnum.NAME_ASC:
+        return { name: 'ASC' };
+      case OrderCompanyEnum.NAME_DESC:
+        return { name: 'DESC' };
+      case OrderCompanyEnum.UPDATED_AT_ASC:
+        return { updatedAt: 'ASC' };
+      case OrderCompanyEnum.UPDATED_AT_DESC:
+        return { updatedAt: 'DESC' };
+      case OrderCompanyEnum.CREATED_AT_ASC:
+        return { createdAt: 'ASC' };
+      case OrderCompanyEnum.CREATED_AT_DESC:
+        return { createdAt: 'DESC' };
+    }
   }
 }
