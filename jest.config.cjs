@@ -12,11 +12,11 @@ module.exports = {
     moduleNameMapper: {
         'src/(.*)': '<rootDir>/src/$1',
     },
-    collectCoverage: false,
+    // collectCoverage: false,
     coverageDirectory: 'coverage',
-    collectCoverageFrom: [
-        'src/.*\\.spec\\.ts(x?)$'
-    ],
+    // collectCoverageFrom: [
+    //     'src/.*\\.spec\\.ts(x?)$'
+    // ],
     coveragePathIgnorePatterns: [
         '^.+\\.d\\.ts$',
         'src/full\\.ts$'
