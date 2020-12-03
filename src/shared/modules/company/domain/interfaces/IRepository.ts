@@ -1,7 +1,7 @@
-import { FieldOptions } from 'src/shared/modules/database/types/IFieldOptions';
-import { QualitativeFieldOptions } from 'src/shared/modules/database/types/IQualitativeFieldOptions';
 import { PaginatorParams } from 'src/shared/core/PaginatorParams';
 import { PayloadResult } from 'src/shared/core/PayloadResult';
+import { FieldOptions } from 'src/shared/modules/data-access/types/IFieldOptions';
+import { QualitativeFieldOptions } from 'src/shared/modules/data-access/types/IQualitativeFieldOptions';
 import { Company } from '../entities/company.entity';
 
 export interface WhereCompany {
@@ -16,29 +16,28 @@ export interface WhereUniqueCompany {
   code?: string;
 }
 
-export type OrCompany = WhereCompany[];
-
-export enum OrderCompany {
-  DESCRIPTION_ASC = 'DESCRIPTION_ASC',
-  DESCRIPTION_DESC = 'DESCRIPTION_DESC',
+export enum OrderCompanyEnum {
+  ID_ASC = 'ID_ASC',
+  ID_DESC = 'ID_DESC',
+  NAME_ASC = 'NAME_ASC',
+  NAME_DESC = 'NAME_DESC',
   CODE_ASC = 'CODE_ASC',
   CODE_DESC = 'CODE_DESC',
+  UPDATED_AT_ASC = 'UPDATED_AT_ASC',
+  UPDATED_AT_DESC = 'UPDATED_AT_DESC',
+  CREATED_AT_ASC = 'CREATED_AT_ASC',
+  CREATED_AT_DESC = 'CREATED_AT_DESC',
 }
 
 export interface ICompanyRepository {
-  exist(whereUnique: WhereCompany): Promise<boolean> | boolean;
-  find(where: OrCompany): Promise<Company[]> | Company[];
-  findOne(whereUnique: WhereUniqueCompany): Promise<Company> | Company;
-  paginatedFind(
+  existCompany(where: WhereCompany): Promise<boolean> | boolean;
+  findAllCompanies(where?: WhereCompany): Promise<Company[]> | Company[];
+  findOneCompany(whereUnique: WhereUniqueCompany): Promise<Company> | Company;
+  paginatedFindCompany(
     paginatorParams: PaginatorParams,
-    where?: OrCompany,
-    order?: OrderCompany,
+    where?: WhereCompany,
+    order?: OrderCompanyEnum,
   ): Promise<PayloadResult<Company>> | PayloadResult<Company>;
-  create(company: Company): Promise<void> | void;
-  update(
-    where: WhereUniqueCompany,
-    lastUpdate: Date,
-    data: Partial<Company>,
-  ): Promise<void> | void;
+  save(company: Company): Promise<void> | void;
   delete(where: WhereUniqueCompany): Promise<void> | void;
 }
