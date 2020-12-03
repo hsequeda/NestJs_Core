@@ -12,3 +12,11 @@ export type PayloadResult<T> = {
   totalItems: number;
   totalPages: number;
 };
+
+export const defaultPayloadResult: PayloadResult<any> = {
+  items: [],
+  limit: 0,
+  currentPage: 0,
+  totalPages: 0,
+  totalItems: 0,
+};
