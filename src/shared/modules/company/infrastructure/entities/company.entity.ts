@@ -1,5 +1,5 @@
 import { Entity, Column } from 'typeorm';
-import { PersistentEntity } from 'src/shared/modules/database/typeorm/base.entity';
+import { PersistentEntity } from 'src/shared/modules/data-access/typeorm/base.entity';
 
 @Entity('company')
 export class CompanyEntity extends PersistentEntity {

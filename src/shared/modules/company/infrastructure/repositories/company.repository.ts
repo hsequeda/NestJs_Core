@@ -90,7 +90,6 @@ export class CompanyRepository implements ICompanyRepository {
       items: persistentCompanies.map(persistentCompany =>
         CompanyMap.PersistenttoDomain(persistentCompany),
       ),
-      totalItems: companyQty,
       limit: pageLimit,
       currentPage,
       totalPages,

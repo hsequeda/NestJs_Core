@@ -1,14 +1,14 @@
 import { Company } from '../../domain/entities/company.entity';
 import { CompanyEntity } from '../entities/company.entity';
-import { Name } from '../../domain/value-objects/name.value-object';
-import { Code } from '../../domain/value-objects/code.value-object';
+import { CompanyName } from '../../domain/value-objects/name.value-object';
+import { CompanyCode } from '../../domain/value-objects/code.value-object';
 import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 import { Result } from 'src/shared/core/Result';
 
 export class CompanyMap {
   public static PersistenttoDomain(persistentEntity: CompanyEntity): Company {
-    const nameOrErr = Name.create({ value: persistentEntity.name });
-    const codeOrErr = Code.create({ value: persistentEntity.code });
+    const nameOrErr = CompanyName.create({ value: persistentEntity.name });
+    const codeOrErr = CompanyCode.create({ value: persistentEntity.code });
     const combineResults = Result.combine([nameOrErr, codeOrErr]);
     if (combineResults.isFailure) {
       throw new Error(combineResults.errorValue().message);

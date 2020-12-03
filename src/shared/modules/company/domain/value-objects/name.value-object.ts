@@ -3,22 +3,23 @@ import { Result } from 'src/shared/core/Result';
 import { Guard } from 'src/shared/core/Guard';
 import { IGuardResult } from 'src/shared/core/interfaces/IGuardResult';
 
-interface NameProps {
+interface CompanyNameProps {
   value: string;
 }
 
-export class Name extends ValueObject<NameProps> {
+export class CompanyName extends ValueObject<CompanyNameProps> {
+  static minLength = 1;
   static maxLength = 20;
 
   get value(): string {
     return this.props.value;
   }
 
-  private constructor(props: NameProps) {
+  private constructor(props: CompanyNameProps) {
     super(props);
   }
 
-  public static create(props: NameProps): Result<Name> {
+  public static create(props: CompanyNameProps): Result<CompanyName> {
     const nullGuardResult: IGuardResult = Guard.againstNullOrUndefined(
       props.value,
       'name',
@@ -27,8 +28,8 @@ export class Name extends ValueObject<NameProps> {
       return Result.fail(nullGuardResult);
     }
 
-    const minGuardResult: IGuardResult = Guard.againstAtMost({
-      numChars: this.maxLength,
+    const minGuardResult: IGuardResult = Guard.againstAtLeast({
+      numChars: this.minLength,
       argument: props.value,
       argumentPath: 'name',
     });
@@ -37,6 +38,16 @@ export class Name extends ValueObject<NameProps> {
       return Result.fail(minGuardResult);
     }
 
-    return Result.ok(new Name(props));
+    const maxGuardResult: IGuardResult = Guard.againstAtMost({
+      numChars: this.maxLength,
+      argument: props.value,
+      argumentPath: 'name',
+    });
+
+    if (!maxGuardResult.succeeded) {
+      return Result.fail(maxGuardResult);
+    }
+
+    return Result.ok(new CompanyName(props));
   }
 }

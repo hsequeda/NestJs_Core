@@ -2,8 +2,8 @@ import { Injectable, Inject } from '@nestjs/common';
 import { ICompanyRepository } from '../../domain/interfaces/IRepository';
 import { ICreateCompanyDto } from '../dtos/create-company.dto';
 import { Company } from '../../domain/entities/company.entity';
-import { Name } from '../../domain/value-objects/name.value-object';
-import { Code } from '../../domain/value-objects/code.value-object';
+import { CompanyName } from '../../domain/value-objects/name.value-object';
+import { CompanyCode } from '../../domain/value-objects/code.value-object';
 import { Result, left, right, Either } from 'src/shared/core/Result';
 import { AppError } from 'src/shared/core/errors/AppError';
 import { IUseCase } from 'src/shared/core/interfaces/IUseCase';
@@ -25,10 +25,10 @@ export class CreateCompanyUseCase
   ) {}
 
   async execute(request: ICreateCompanyDto): Promise<Response> {
-    const nameOrErr: Result<Name> = Name.create({
+    const nameOrErr: Result<CompanyName> = CompanyName.create({
       value: request.name,
     });
-    const codeOrErr: Result<Code> = Code.create({
+    const codeOrErr: Result<CompanyCode> = CompanyCode.create({
       value: request.code,
     });
     const dtoResult = Result.combine([nameOrErr, codeOrErr]);
@@ -39,24 +39,25 @@ export class CreateCompanyUseCase
       name: nameOrErr.getValue(),
       code: codeOrErr.getValue(),
     });
+
     if (companyOrErr.isFailure) {
       return left(Result.fail(companyOrErr.errorValue()));
     }
     const company: Company = companyOrErr.getValue();
     try {
-      const codeExist: boolean = await this._companyRepository.exist({
+      const codeExist: boolean = await this._companyRepository.existCompany({
         code: { is: company.code.value },
       });
       if (!codeExist) {
         return left(new CompanyErrors.CodeExistError(company.code.value));
       }
-      const nameExist: boolean = await this._companyRepository.exist({
+      const nameExist: boolean = await this._companyRepository.existCompany({
         name: { is: company.name.value },
       });
       if (!nameExist) {
         return left(new CompanyErrors.NameExistError(company.name.value));
       }
-      await this._companyRepository.create(company);
+      await this._companyRepository.save(company);
       return right(Result.ok(company));
     } catch (err) {
       return left(new AppError.UnexpectedError(err));

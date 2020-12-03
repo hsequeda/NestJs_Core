@@ -8,8 +8,8 @@ interface PaginatorParamsProps {
 }
 
 export class PaginatorParams extends ValueObject<PaginatorParamsProps> {
-  private pageMinValue = 1;
-  private pageLimitMinValue = 1;
+  static pageMinValue = 1;
+  static pageLimitMinValue = 1;
 
   get pageLimit(): number {
     return this.props.pageLimit;
@@ -19,7 +19,7 @@ export class PaginatorParams extends ValueObject<PaginatorParamsProps> {
     return this.props.pageNum;
   }
 
-  create(props: PaginatorParamsProps): Result<PaginatorParams> {
+  static create(props: PaginatorParamsProps): Result<PaginatorParams> {
     const pageLimitIsGreaterThanResult = Guard.greaterThanEqual(
       this.pageLimitMinValue,
       props.pageLimit,
