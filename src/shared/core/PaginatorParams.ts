@@ -1,4 +1,42 @@
-export class PaginatorParams {
-  page: number;
-  limit: number;
+import { ValueObject } from '../domain/value-object.abstract';
+import { Guard } from './Guard';
+import { Result } from './Result';
+
+interface PaginatorParamsProps {
+  pageNum: number;
+  pageLimit: number;
+}
+
+export class PaginatorParams extends ValueObject<PaginatorParamsProps> {
+  private pageMinValue = 1;
+  private pageLimitMinValue = 1;
+
+  get pageLimit(): number {
+    return this.props.pageLimit;
+  }
+
+  get pageNum(): number {
+    return this.props.pageNum;
+  }
+
+  create(props: PaginatorParamsProps): Result<PaginatorParams> {
+    const pageLimitIsGreaterThanResult = Guard.greaterThanEqual(
+      this.pageLimitMinValue,
+      props.pageLimit,
+      'pageLimit',
+    );
+
+    if (!pageLimitIsGreaterThanResult.succeeded)
+      return Result.fail(pageLimitIsGreaterThanResult);
+    const pageNumIsGreaterThanResult = Guard.greaterThanEqual(
+      this.pageMinValue,
+      props.pageNum,
+      'pageNum',
+    );
+
+    if (!pageNumIsGreaterThanResult.succeeded)
+      return Result.fail(pageNumIsGreaterThanResult);
+
+    return Result.ok(new PaginatorParams(props));
+  }
 }
