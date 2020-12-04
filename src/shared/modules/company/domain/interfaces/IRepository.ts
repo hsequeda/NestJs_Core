@@ -1,20 +1,23 @@
 import { PaginatorParams } from 'src/shared/core/PaginatorParams';
-import { PayloadResult } from 'src/shared/core/PayloadResult';
+import { PaginatedFindResult } from 'src/shared/core/PaginatedFindResult';
 import { FieldOptions } from 'src/shared/modules/data-access/types/IFieldOptions';
 import { QualitativeFieldOptions } from 'src/shared/modules/data-access/types/IQualitativeFieldOptions';
 import { Company } from '../entities/company.entity';
 
-export interface WhereCompany {
+export type WhereCompany = {
   id?: FieldOptions<string | number>;
   code?: QualitativeFieldOptions;
   name?: QualitativeFieldOptions;
-}
+  active?: FieldOptions<boolean>;
+};
 
-export interface WhereUniqueCompany {
+export type WhereCompanyExist = Omit<WhereCompany, 'active'>;
+
+export type WhereUniqueCompany = {
   id?: string;
   name?: string;
   code?: string;
-}
+};
 
 export enum OrderCompanyEnum {
   ID_ASC = 'ID_ASC',
@@ -30,14 +33,14 @@ export enum OrderCompanyEnum {
 }
 
 export interface ICompanyRepository {
-  existCompany(where: WhereCompany): Promise<boolean> | boolean;
+  existCompany(where: WhereCompanyExist): Promise<boolean> | boolean;
   findAllCompanies(where?: WhereCompany): Promise<Company[]> | Company[];
   findOneCompany(whereUnique: WhereUniqueCompany): Promise<Company> | Company;
   paginatedFindCompany(
     paginatorParams: PaginatorParams,
     where?: WhereCompany,
     order?: OrderCompanyEnum,
-  ): Promise<PayloadResult<Company>> | PayloadResult<Company>;
+  ): Promise<PaginatedFindResult<Company>> | PaginatedFindResult<Company>;
   save(company: Company): Promise<void> | void;
   delete(where: WhereUniqueCompany): Promise<void> | void;
 }

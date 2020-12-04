@@ -21,6 +21,7 @@ export class CompanyMap {
         code: codeOrErr.getValue(),
         createdAt: persistentEntity.createdAt,
         updatedAt: persistentEntity.updatedAt,
+        active: persistentEntity.active,
       },
       id,
     );
@@ -41,6 +42,7 @@ export class CompanyMap {
       name: domainEntity.name.value,
       createdAt: domainEntity.createdAt,
       updatedAt: domainEntity.updatedAt,
+      active: domainEntity.isActive,
     };
   }
 }

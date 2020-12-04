@@ -6,7 +6,6 @@ import {
 import {
   IQuantitativeFieldOptions,
   QuantitativeFieldOptionsKeys,
-  IBetween,
 } from '../types/IQuantitativeFieldOptions';
 import {
   Equal,
@@ -21,63 +20,88 @@ import {
   MoreThanOrEqual,
   Between,
 } from 'typeorm';
+import { has } from 'lodash';
 
 export class TypeORMDataAccessUtils {
-  static parseFieldOption<T>(fieldOptions: FieldOptions<T>): any {
-    const [key, value] = Object.entries(fieldOptions).pop();
-    switch (key) {
-      case FieldOptionsKeys.IS_NULL:
+  static parseFieldOption<T>(fieldOption: FieldOptions<T>): any {
+    switch (true) {
+      case has(fieldOption, FieldOptionsKeys.IS_NULL):
         return IsNull();
-      case FieldOptionsKeys.ANY:
-        return Any(value as T[]);
-      case FieldOptionsKeys.IS:
-        return Equal(value);
-      case FieldOptionsKeys.NOT:
-        return Not(Equal(value));
-      case FieldOptionsKeys.IN:
-        return In(value as T[]);
-      case FieldOptionsKeys.NOT_IN:
-        return Not(In(value as T[]));
+      case has(fieldOption, FieldOptionsKeys.ANY):
+        return Any(fieldOption[FieldOptionsKeys.ANY] as T[]);
+      case has(FieldOptionsKeys, FieldOptionsKeys.IS):
+        return Equal(fieldOption[FieldOptionsKeys.IS]);
+      case has(FieldOptionsKeys, FieldOptionsKeys.NOT):
+        return Not(Equal(fieldOption[FieldOptionsKeys.NOT]));
+      case has(FieldOptionsKeys, FieldOptionsKeys.IN):
+        return In(fieldOption[FieldOptionsKeys.IN] as T[]);
+      case has(FieldOptionsKeys, FieldOptionsKeys.NOT_IN):
+        return Not(In(fieldOption[FieldOptionsKeys.NOT_IN] as T[]));
+      default:
+        return fieldOption;
     }
   }
 
   static parseQualitativeFieldOption(
-    strFieldOptions: QualitativeFieldOptions,
+    strFieldOption: QualitativeFieldOptions,
   ): any {
-    const [key, value] = Object.entries(strFieldOptions).pop();
-    switch (key) {
-      case QualitativeFieldOptionsKeys.CONTAINS:
-        return ILike(`%${value}%`);
-      case QualitativeFieldOptionsKeys.NOT_CONTAINS:
-        return Not(ILike(`%${value}%`));
-      case QualitativeFieldOptionsKeys.STARTS_WITH:
-        return ILike(`${value}%`);
-      case QualitativeFieldOptionsKeys.NOT_STARTS_WITH:
-        return Not(ILike(`${value}%`));
-      case QualitativeFieldOptionsKeys.ENDS_WITH:
-        return ILike(`%${value}`);
-      case QualitativeFieldOptionsKeys.NOT_ENDS_WITH:
-        return Not(ILike(`%${value}`));
+    switch (true) {
+      case has(strFieldOption, QualitativeFieldOptionsKeys.CONTAINS):
+        return ILike(
+          `%${strFieldOption[QualitativeFieldOptionsKeys.CONTAINS]}%`,
+        );
+      case has(strFieldOption, QualitativeFieldOptionsKeys.NOT_CONTAINS):
+        return Not(
+          ILike(
+            `%${strFieldOption[QualitativeFieldOptionsKeys.NOT_CONTAINS]}%`,
+          ),
+        );
+      case has(strFieldOption, QualitativeFieldOptionsKeys.STARTS_WITH):
+        return ILike(
+          `${strFieldOption[QualitativeFieldOptionsKeys.STARTS_WITH]}%`,
+        );
+      case has(strFieldOption, QualitativeFieldOptionsKeys.NOT_STARTS_WITH):
+        return Not(
+          ILike(
+            `${strFieldOption[QualitativeFieldOptionsKeys.NOT_STARTS_WITH]}%`,
+          ),
+        );
+      case has(strFieldOption, QualitativeFieldOptionsKeys.ENDS_WITH):
+        return ILike(
+          `%${strFieldOption[QualitativeFieldOptionsKeys.ENDS_WITH]}`,
+        );
+      case has(strFieldOption, QualitativeFieldOptionsKeys.NOT_ENDS_WITH):
+        return Not(
+          ILike(
+            `%${strFieldOption[QualitativeFieldOptionsKeys.NOT_ENDS_WITH]}`,
+          ),
+        );
       default:
-        return this.parseFieldOption(strFieldOptions);
+        return this.parseFieldOption(strFieldOption);
     }
   }
 
   static parseQuantitativeFieldOption(
     numFieldOption: IQuantitativeFieldOptions,
   ): any {
-    const [key, value] = Object.entries(numFieldOption).pop();
-    switch (key) {
-      case QuantitativeFieldOptionsKeys.LT:
-        return LessThan(value);
-      case QuantitativeFieldOptionsKeys.LTE:
-        return LessThanOrEqual(value);
-      case QuantitativeFieldOptionsKeys.GT:
-        return MoreThan(value);
-      case QuantitativeFieldOptionsKeys.GTE:
-        return MoreThanOrEqual(value);
-      case QuantitativeFieldOptionsKeys.BETWEEN:
-        return Between((value as IBetween).from, (value as IBetween).to);
+    switch (true) {
+      case has(numFieldOption, QuantitativeFieldOptionsKeys.LT):
+        return LessThan(numFieldOption[QuantitativeFieldOptionsKeys.LT]);
+      case has(numFieldOption, QuantitativeFieldOptionsKeys.LTE):
+        return LessThanOrEqual(
+          numFieldOption[QuantitativeFieldOptionsKeys.LTE],
+        );
+      case has(numFieldOption, QuantitativeFieldOptionsKeys.GT):
+        return MoreThan(numFieldOption[QuantitativeFieldOptionsKeys.GT]);
+      case has(numFieldOption, QuantitativeFieldOptionsKeys.GTE):
+        return MoreThanOrEqual(
+          numFieldOption[QuantitativeFieldOptionsKeys.GTE],
+        );
+      case has(numFieldOption, QuantitativeFieldOptionsKeys.BETWEEN):
+        return Between(
+          numFieldOption[QuantitativeFieldOptionsKeys.BETWEEN].from,
+          numFieldOption[QuantitativeFieldOptionsKeys.BETWEEN].to,
+        );
       default:
         return this.parseFieldOption(numFieldOption);
     }

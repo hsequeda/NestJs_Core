@@ -12,6 +12,7 @@ interface CompanyProps {
   name: CompanyName;
   createdAt?: Date;
   updatedAt?: Date;
+  active?: boolean;
 }
 export class Company extends DomainEntity<CompanyProps> {
   get id(): string {
@@ -32,6 +33,10 @@ export class Company extends DomainEntity<CompanyProps> {
 
   get updatedAt(): Date {
     return this.props.updatedAt;
+  }
+
+  get isActive(): boolean {
+    return this.props.active;
   }
 
   changeName(newName: CompanyName): void {
@@ -58,6 +63,7 @@ export class Company extends DomainEntity<CompanyProps> {
     }
     if (isNil(props.createdAt)) props.createdAt = new Date();
     if (isNil(props.updatedAt)) props.updatedAt = new Date();
+    if (isNil(props.active)) props.active = true;
     return Result.ok(new Company(props, id));
   }
 }

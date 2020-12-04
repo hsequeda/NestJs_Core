@@ -3,13 +3,14 @@ import {
   OrderCompanyEnum,
   WhereUniqueCompany,
   WhereCompany,
+  WhereCompanyExist,
 } from '../../domain/interfaces/IRepository';
 import { PaginatorParams } from 'src/shared/core/PaginatorParams';
 import {
-  PayloadResult,
-  defaultPayloadResult,
-} from '../../../../core/PayloadResult';
-import { Repository } from 'typeorm';
+  PaginatedFindResult,
+  defaultPaginatedFindResult,
+} from '../../../../core/PaginatedFindResult';
+import { Repository, Equal } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CompanyEntity } from '../entities/company.entity';
 import { Company } from '../../domain/entities/company.entity';
@@ -23,8 +24,9 @@ export class CompanyRepository implements ICompanyRepository {
     private readonly _companyRepository: Repository<CompanyEntity>,
   ) {}
 
-  async existCompany(where: WhereCompany): Promise<boolean> {
+  async existCompany(where: WhereCompanyExist): Promise<boolean> {
     const rawWhere = this.toRawWhere(where);
+    rawWhere.active = Equal(true);
     const companyCount = await this._companyRepository.count({
       where: rawWhere,
     });
@@ -55,18 +57,24 @@ export class CompanyRepository implements ICompanyRepository {
     paginatorParams: PaginatorParams,
     where?: WhereCompany,
     orderEnum?: OrderCompanyEnum,
-  ): Promise<PayloadResult<Company>> {
+  ): Promise<PaginatedFindResult<Company>> {
     const rawWhere = this.toRawWhere(where);
+
     const orderBy = this.getCompanyOrderByEnum(orderEnum);
+
     const companyQty = await this._companyRepository.count({
       where: rawWhere,
     });
-    if (companyQty === 0) return defaultPayloadResult;
+
+    if (companyQty === 0) return defaultPaginatedFindResult;
+
     const pageLimit: number =
       paginatorParams.pageLimit < companyQty
         ? paginatorParams.pageLimit
         : companyQty;
+
     const totalPages: number = Math.trunc(companyQty / pageLimit);
+
     const currentPage: number =
       paginatorParams.pageNum < totalPages
         ? paginatorParams.pageNum
@@ -117,8 +125,9 @@ export class CompanyRepository implements ICompanyRepository {
       rawWhere.name = TypeORMDataAccessUtils.parseQualitativeFieldOption(
         where.name,
       );
-
-    return { active: true, ...rawWhere };
+    if (has(where, 'active'))
+      rawWhere.active = TypeORMDataAccessUtils.parseFieldOption(where.active);
+    return { ...rawWhere };
   }
 
   private getCompanyOrderByEnum(
