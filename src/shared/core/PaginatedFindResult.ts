@@ -2,17 +2,17 @@
  * Generic paginatedFind payload with pagination included.
  *
  * @export
- * @interface IPayloadResult
+ * @type PaginatedFindResult
  * @template T
  */
-export type PayloadResult<T> = {
+export type PaginatedFindResult<T> = {
   items: T[];
   limit: number;
   currentPage: number;
   totalPages: number;
 };
 
-export const defaultPayloadResult: PayloadResult<any> = {
+export const defaultPaginatedFindResult: PaginatedFindResult<any> = {
   items: [],
   limit: 0,
   currentPage: 0,
