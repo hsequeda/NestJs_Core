@@ -5,10 +5,7 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 import { PaginatorParams } from 'src/shared/core/PaginatorParams';
-
-export type MockType<T> = {
-  [P in keyof T]: jest.Mock<{}>;
-};
+import { MockType } from 'src/shared/core/interfaces/MockType';
 
 // @ts-ignore
 export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(
@@ -19,7 +16,7 @@ export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(
   }),
 );
 
-describe('findOneCompany', () => {
+describe('Testing Company Repository implementation', () => {
   let companyRepository: CompanyRepository;
   let repositoryMock: MockType<Repository<CompanyEntity>>;
 
@@ -46,21 +43,19 @@ describe('findOneCompany', () => {
       updatedAt: new Date(),
       active: true,
     };
-    repositoryMock.findOne.mockReturnValue(company);
-    const result = await companyRepository.findOneCompany({
-      name: company.name,
-    });
 
+    repositoryMock.findOne.mockReturnValue(company);
+    const result = await companyRepository.findOneById(company.id.toString());
     expect(result.updatedAt).toEqual(company.updatedAt);
     expect(result.createdAt).toEqual(company.createdAt);
-    expect(result.id).toEqual(company.id);
+    expect(result._id.toString()).toEqual(company.id);
     expect(result.name.value).toEqual(company.name);
     expect(result.code.value).toEqual(company.code);
   });
 
   it("company isn't found", async () => {
     repositoryMock.findOne.mockReturnValue(undefined);
-    await expect(companyRepository.findOneCompany({})).rejects.toHaveProperty(
+    await expect(companyRepository.findOneById('')).rejects.toHaveProperty(
       'message',
       'Company not found',
     );
@@ -87,7 +82,6 @@ describe('findOneCompany', () => {
     ];
     repositoryMock.find.mockReturnValue(companies);
     repositoryMock.count.mockReturnValue(2);
-
     const pagParamOrErr = PaginatorParams.create({ pageNum: 1, pageLimit: 1 });
     expect(pagParamOrErr.isSuccess).toEqual(true);
     const paginatedCompanies = await companyRepository.paginatedFindCompany(
@@ -101,16 +95,13 @@ describe('findOneCompany', () => {
   it('should returns a default paginatedPayload', async () => {
     repositoryMock.find.mockReturnValue({});
     repositoryMock.count.mockReturnValue(0);
-
     const pagParamOrErr = PaginatorParams.create({ pageNum: 1, pageLimit: 1 });
     expect(pagParamOrErr.isSuccess).toEqual(true);
     const paginatedCompanies = await companyRepository.paginatedFindCompany(
       pagParamOrErr.getValue(),
     );
-
     expect(paginatedCompanies.limit).toEqual(0);
     expect(paginatedCompanies.currentPage).toEqual(0);
     expect(paginatedCompanies.totalPages).toEqual(0);
   });
 });
-

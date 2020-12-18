@@ -1,22 +1,21 @@
 import {
   ICompanyRepository,
   OrderCompanyEnum,
-  WhereUniqueCompany,
   WhereCompany,
-  WhereCompanyExist,
 } from '../../domain/interfaces/IRepository';
 import { PaginatorParams } from 'src/shared/core/PaginatorParams';
 import {
   PaginatedFindResult,
   defaultPaginatedFindResult,
 } from '../../../../core/PaginatedFindResult';
-import { Repository, Equal } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CompanyEntity } from '../entities/company.entity';
 import { Company } from '../../domain/entities/company.entity';
 import { CompanyMap } from '../mapper/company.mapper';
 import { TypeORMDataAccessUtils } from 'src/shared/modules/data-access/typeorm/field-options.parser';
 import { has, isNil } from 'lodash';
+import { Version } from 'src/shared/domain/version.value-object';
 
 export class CompanyRepository implements ICompanyRepository {
   constructor(
@@ -24,13 +23,86 @@ export class CompanyRepository implements ICompanyRepository {
     private readonly _companyRepository: Repository<CompanyEntity>,
   ) {}
 
-  async existCompany(where: WhereCompanyExist): Promise<boolean> {
-    const rawWhere = this.toRawWhere(where);
-    rawWhere.active = Equal(true);
-    const companyCount = await this._companyRepository.count({
-      where: rawWhere,
+  async existCompanyWithId(id: string): Promise<boolean> {
+    return (
+      (await this._companyRepository.count({
+        where: { id, deletedAt: IsNull() },
+      })) > 0
+    );
+  }
+
+  async existCompanyWithName(name: string): Promise<boolean> {
+    return (
+      (await this._companyRepository.count({
+        where: { name, deletedAt: IsNull() },
+      })) > 0
+    );
+  }
+
+  async existCompanyWithCode(code: string): Promise<boolean> {
+    return (
+      (await this._companyRepository.count({
+        where: { code, deletedAt: IsNull() },
+      })) > 0
+    );
+  }
+
+  async create(company: Company): Promise<void> {
+    const partialCompanyEntity = CompanyMap.DomainToPersitent(company);
+    await this._companyRepository.create(partialCompanyEntity).save();
+  }
+
+  async update(company: Company, currentVersion: Version): Promise<void> {
+    const partialCompanyEntity = CompanyMap.DomainToPersitent(company);
+    const queryRunner = this._companyRepository.queryRunner;
+    queryRunner.startTransaction();
+    try {
+      const persitedCompany = await this._companyRepository.findOne({
+        where: { id: partialCompanyEntity.id },
+      });
+      if (persitedCompany.version > currentVersion.value)
+        throw new Error(
+          'The version of the persisted entity is greater than the one passed through the parameters',
+        );
+      await this._companyRepository.create(partialCompanyEntity).save();
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw new Error(err.message);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async delete(id: string, currentVersion: Version): Promise<void> {
+    const queryRunner = this._companyRepository.queryRunner;
+    queryRunner.startTransaction();
+    try {
+      const persitedCompany = await this._companyRepository.findOne({
+        where: { id },
+      });
+      if (persitedCompany.version > currentVersion.value)
+        throw new Error(
+          'The version of the persisted entity is greater than the one passed through the parameters',
+        );
+      persitedCompany.version = currentVersion.value;
+      persitedCompany.deletedAt = new Date();
+      persitedCompany.save();
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw new Error(err.message);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async findOneById(id: string): Promise<Company> {
+    const company: CompanyEntity = await this._companyRepository.findOne({
+      where: { id },
     });
-    return companyCount > 0;
+    if (isNil(company)) throw new Error('Company not found');
+    return CompanyMap.PersistentToDomain(company);
   }
 
   async findAllCompanies(where?: WhereCompany): Promise<Company[]> {
@@ -40,17 +112,8 @@ export class CompanyRepository implements ICompanyRepository {
     });
 
     return companies.map(company => {
-      return CompanyMap.PersistenttoDomain(company);
+      return CompanyMap.PersistentToDomain(company);
     });
-  }
-
-  async findOneCompany(whereUnique: WhereUniqueCompany): Promise<Company> {
-    const company = await this._companyRepository.findOne({
-      active: true,
-      ...whereUnique,
-    });
-    if (isNil(company)) throw new Error('Company not found');
-    return CompanyMap.PersistenttoDomain(company);
   }
 
   async paginatedFindCompany(
@@ -96,21 +159,12 @@ export class CompanyRepository implements ICompanyRepository {
 
     return {
       items: persistentCompanies.map(persistentCompany =>
-        CompanyMap.PersistenttoDomain(persistentCompany),
+        CompanyMap.PersistentToDomain(persistentCompany),
       ),
       limit: pageLimit,
       currentPage,
       totalPages,
     };
-  }
-
-  async save(company: Company): Promise<void> {
-    const partialCompanyEntity = CompanyMap.DomaintoPersitent(company);
-    await this._companyRepository.create(partialCompanyEntity).save();
-  }
-
-  async delete(where: WhereUniqueCompany): Promise<void> {
-    await this._companyRepository.update(where, { active: false });
   }
 
   private toRawWhere(where: WhereCompany): any {
