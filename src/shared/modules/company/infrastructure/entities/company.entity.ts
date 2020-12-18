@@ -7,6 +7,13 @@ export class CompanyEntity extends PersistentEntity {
   code: string;
   @Column({ type: 'varchar2', name: 'name' })
   name: string;
-  @Column({ type: 'boolean', name: 'active', default: true })
-  active: boolean;
+  @Column({ type: 'timestamp', name: 'deletedAt', nullable: true })
+  deletedAt: Date;
+  // @OneToMany(
+  //   () => CompanyRegEntity,
+  //   reg => reg.company,
+  // )
+  // registers: CompanyRegEntity[];
+  @Column({ type: 'number', name: 'version' })
+  version: number;
 }

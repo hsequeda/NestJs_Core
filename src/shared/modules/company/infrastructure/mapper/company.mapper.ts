@@ -6,7 +6,7 @@ import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 import { Result } from 'src/shared/core/Result';
 
 export class CompanyMap {
-  public static PersistenttoDomain(persistentEntity: CompanyEntity): Company {
+  public static PersistentToDomain(persistentEntity: CompanyEntity): Company {
     const nameOrErr = CompanyName.create({ value: persistentEntity.name });
     const codeOrErr = CompanyCode.create({ value: persistentEntity.code });
     const combineResults = Result.combine([nameOrErr, codeOrErr]);
@@ -21,7 +21,7 @@ export class CompanyMap {
         code: codeOrErr.getValue(),
         createdAt: persistentEntity.createdAt,
         updatedAt: persistentEntity.updatedAt,
-        active: persistentEntity.active,
+        deletedAt: persistentEntity.deletedAt,
       },
       id,
     );
@@ -33,16 +33,16 @@ export class CompanyMap {
     return companyOrErr.getValue();
   }
 
-  public static DomaintoPersitent(
+  public static DomainToPersitent(
     domainEntity: Company,
   ): Partial<CompanyEntity> {
     return {
-      id: domainEntity.id,
+      id: domainEntity._id.toString(),
       code: domainEntity.code.value,
       name: domainEntity.name.value,
       createdAt: domainEntity.createdAt,
       updatedAt: domainEntity.updatedAt,
-      active: domainEntity.isActive,
+      deletedAt: domainEntity.isActive ? undefined : domainEntity.updatedAt,
     };
   }
 }
