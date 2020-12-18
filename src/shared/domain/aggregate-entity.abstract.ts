@@ -1,16 +1,19 @@
+import { AggregateRoot } from '@nestjs/cqrs';
 import { UniqueEntityID } from './UniqueEntityID';
 import { IEntity } from '../core/interfaces/IEntity';
 
-export abstract class DomainEntity<T> implements IEntity<T> {
+export abstract class AggregateDomainEntity<T> extends AggregateRoot
+  implements IEntity<T> {
   public readonly _id: UniqueEntityID;
   public readonly props: T;
 
   protected constructor(props: T, id: UniqueEntityID) {
+    super();
     this._id = id;
     this.props = props;
   }
 
-  public equals(entity: DomainEntity<T>): boolean {
+  public equals(entity: AggregateDomainEntity<T>): boolean {
     if (entity === null || entity === undefined) {
       return false;
     }
@@ -26,7 +29,7 @@ export abstract class DomainEntity<T> implements IEntity<T> {
     return this._id === entity._id;
   }
 
-  private isEntity(v: any): v is DomainEntity<any> {
-    return v instanceof DomainEntity;
+  private isEntity(v: any): v is AggregateDomainEntity<any> {
+    return v instanceof AggregateDomainEntity;
   }
 }
