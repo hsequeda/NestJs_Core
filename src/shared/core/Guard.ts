@@ -149,7 +149,7 @@ export class Guard {
       ? getSuccessResult(argumentPath)
       : {
           succeeded: false,
-          message: `${argumentPath}.shouldBeAtLeast${numChars}chars`,
+          message: `${argumentPath} should has at least ${numChars} chars`,
         };
   }
 
