@@ -1,6 +1,7 @@
 import { ValueObject } from 'src/shared/domain/value-object.abstract';
 import { Result } from 'src/shared/core/Result';
 import { Guard } from 'src/shared/core/Guard';
+import { AppError } from 'src/shared/core/errors/AppError';
 
 interface CompanyCodeProps {
   value: string;
@@ -21,7 +22,7 @@ export class CompanyCode extends ValueObject<CompanyCodeProps> {
   public static create(props: CompanyCodeProps): Result<CompanyCode> {
     const nullGuardResult = Guard.againstNullOrUndefined(props.value, 'code');
     if (!nullGuardResult.succeeded) {
-      return Result.fail(nullGuardResult);
+      return new AppError.ValidationError({ message: nullGuardResult.message });
     }
 
     const minGuardResult = Guard.againstAtLeast({
@@ -31,7 +32,7 @@ export class CompanyCode extends ValueObject<CompanyCodeProps> {
     });
 
     if (!minGuardResult.succeeded) {
-      return Result.fail(minGuardResult);
+      return new AppError.ValidationError({ message: minGuardResult.message });
     }
 
     const maxGuardResult = Guard.againstAtMost({
@@ -41,7 +42,7 @@ export class CompanyCode extends ValueObject<CompanyCodeProps> {
     });
 
     if (!maxGuardResult.succeeded) {
-      return Result.fail(minGuardResult);
+      return new AppError.ValidationError({ message: maxGuardResult.message });
     }
 
     return Result.ok(new CompanyCode(props));

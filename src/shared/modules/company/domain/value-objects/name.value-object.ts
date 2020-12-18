@@ -2,6 +2,7 @@ import { ValueObject } from 'src/shared/domain/value-object.abstract';
 import { Result } from 'src/shared/core/Result';
 import { Guard } from 'src/shared/core/Guard';
 import { IGuardResult } from 'src/shared/core/interfaces/IGuardResult';
+import { AppError } from 'src/shared/core/errors/AppError';
 
 interface CompanyNameProps {
   value: string;
@@ -25,7 +26,7 @@ export class CompanyName extends ValueObject<CompanyNameProps> {
       'name',
     );
     if (!nullGuardResult.succeeded) {
-      return Result.fail(nullGuardResult);
+      return new AppError.ValidationError({ message: nullGuardResult.message });
     }
 
     const minGuardResult: IGuardResult = Guard.againstAtLeast({
@@ -35,7 +36,7 @@ export class CompanyName extends ValueObject<CompanyNameProps> {
     });
 
     if (!minGuardResult.succeeded) {
-      return Result.fail(minGuardResult);
+      return new AppError.ValidationError({ message: minGuardResult.message });
     }
 
     const maxGuardResult: IGuardResult = Guard.againstAtMost({
@@ -45,7 +46,7 @@ export class CompanyName extends ValueObject<CompanyNameProps> {
     });
 
     if (!maxGuardResult.succeeded) {
-      return Result.fail(maxGuardResult);
+      return new AppError.ValidationError({ message: maxGuardResult.message });
     }
 
     return Result.ok(new CompanyName(props));
