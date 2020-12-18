@@ -14,18 +14,16 @@ export namespace AppError {
         message: 'unexpectedServerError',
         error: err,
       });
-      Logger.log('[AppError]: An unexpected error occurred');
+      Logger.log('An unexpected error occurred', 'AppError');
       Logger.error(err);
-    }
-
-    public static create(err: unknown): UnexpectedError {
-      return new UnexpectedError(err);
     }
   }
 
-  export class ValidationError extends Result<IResultError> {
+  export class ValidationError<R> extends Result<R> {
     constructor({ message, error }: IResultError) {
       super(false, { message, error });
+      Logger.log('A validation error occurred', 'AppError');
+      Logger.error(message);
     }
   }
 }
