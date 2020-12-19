@@ -1,7 +1,7 @@
 import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 import { IGuardArgument } from 'src/shared/core/interfaces/IGuardArgument';
 import { Guard } from 'src/shared/core/Guard';
-import { Result } from 'src/shared/core/Result';
+import { Result, Either, right, left } from 'src/shared/core/Result';
 import { CompanyCode } from '../value-objects/code.value-object';
 import { CompanyName } from '../value-objects/name.value-object';
 import { isNil } from 'lodash';
@@ -10,6 +10,8 @@ import { AggregateDomainEntity } from 'src/shared/domain/aggregate-entity.abstra
 import { CreatedCompanyEvent } from '../events/create-company.event';
 import { UpdatedCompanyEvent } from '../events/updated-company.event';
 import { DeletedCompanyEvent } from '../events/deleted-company.event';
+import { CompanyErrors } from '../errors/company.error';
+import { AppError } from 'src/shared/core/errors/AppError';
 
 interface CompanyProps {
   code: CompanyCode;
@@ -45,9 +47,11 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     return this.props.version;
   }
 
-  changeName(newName: CompanyName): Result<void> {
+  changeName(
+    newName: CompanyName,
+  ): Either<CompanyErrors.CompanyHasBeenDeleted, Result<void>> {
     if (!this.isActive) {
-      return Result.fail(new Error('This Company has been deleted')); // TODO
+      return left(new CompanyErrors.CompanyHasBeenDeleted());
     }
     this.props.name = newName;
     this.increaseVersion();
@@ -55,12 +59,14 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     this.apply(
       new UpdatedCompanyEvent(this._id.toString(), this.version.value),
     );
-    return Result.ok();
+    return right(Result.ok());
   }
 
-  changeCode(newCode: CompanyCode): Result<void> {
+  changeCode(
+    newCode: CompanyCode,
+  ): Either<CompanyErrors.CompanyHasBeenDeleted, Result<void>> {
     if (!this.isActive) {
-      return Result.fail(new Error('This Company has been deleted')); // TODO
+      return left(new CompanyErrors.CompanyHasBeenDeleted());
     }
     this.props.code = newCode;
     this.increaseVersion();
@@ -68,12 +74,12 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     this.apply(
       new UpdatedCompanyEvent(this._id.toString(), this.version.value),
     );
-    return Result.ok();
+    return right(Result.ok());
   }
 
-  markHasDeleted(): Result<void> {
-    if (this.isActive) {
-      return Result.fail(new Error('This Company has been deleted')); // TODO
+  markHasDeleted(): Either<CompanyErrors.CompanyHasBeenDeleted, Result<void>> {
+    if (!this.isActive) {
+      return left(new CompanyErrors.CompanyHasBeenDeleted());
     }
 
     this.props.updatedAt = new Date();
@@ -81,7 +87,7 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     this.apply(
       new DeletedCompanyEvent(this._id.toString(), this.version.value),
     );
-    return Result.ok();
+    return right(Result.ok());
   }
 
   private increaseVersion(): void {
@@ -109,7 +115,7 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     ];
     const nullGuard = Guard.againstNullOrUndefinedBulk(args);
     if (!nullGuard.succeeded) {
-      return Result.fail(nullGuard);
+      return new AppError.ValidationError({ message: nullGuard.message });
     }
     if (isNil(props.createdAt)) props.createdAt = new Date();
     if (isNil(props.updatedAt)) props.updatedAt = new Date();
