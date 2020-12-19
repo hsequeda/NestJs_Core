@@ -5,8 +5,8 @@ import { DeleteCompanyUseCase } from '../../useCases/deleteCompany/delete-compan
 @CommandHandler(DeleteCompanyCommand)
 export class DeleteCompanyHandler
   implements ICommandHandler<DeleteCompanyCommand> {
-  constructor(private createCompanyUseCase: DeleteCompanyUseCase) {}
-  async execute({ createCompanyDto }: DeleteCompanyCommand) {
-    return await this.createCompanyUseCase.execute(createCompanyDto);
+  constructor(private deleteCompanyUseCase: DeleteCompanyUseCase) {}
+  async execute({ input }: DeleteCompanyCommand) {
+    return await this.deleteCompanyUseCase.execute(input);
   }
 }
