@@ -86,7 +86,7 @@ describe('Testing Create-Company Use-Case', () => {
     expect(persistedCompany.createdAt.getTime()).toBeLessThan(Date.now());
   });
 
-  it('Error: name should have at least 1 chars', async () => {
+  it('Error: Name should have at least 1 chars', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(false);
     companyRepoMock.existCompanyWithName.mockReturnValue(false);
     const resp = await createCompanyUseCase.execute({
@@ -101,7 +101,7 @@ describe('Testing Create-Company Use-Case', () => {
     );
   });
 
-  it('Error: name should be lower than 20 chars', async () => {
+  it('Error: Name should be lower than 20 chars', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(false);
     companyRepoMock.existCompanyWithName.mockReturnValue(false);
     const resp = await createCompanyUseCase.execute({
@@ -116,7 +116,7 @@ describe('Testing Create-Company Use-Case', () => {
     );
   });
 
-  it('Error: code should have at least 1 chars', async () => {
+  it('Error: Code should have at least 1 chars', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(false);
     companyRepoMock.existCompanyWithName.mockReturnValue(false);
     const resp = await createCompanyUseCase.execute({
@@ -131,22 +131,22 @@ describe('Testing Create-Company Use-Case', () => {
     );
   });
 
-  it('Error: name should be lower than 20 chars', async () => {
+  it('Error: Code should be lower than 4 chars', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(false);
     companyRepoMock.existCompanyWithName.mockReturnValue(false);
     const resp = await createCompanyUseCase.execute({
-      code: 'LOR',
-      name: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      code: 'Invalid Code',
+      name: 'Lorem ipsum...',
     });
 
     expect(resp.isLeft()).toBeTruthy();
     expect(resp.value instanceof AppError.ValidationError).toBeTruthy();
     expect(resp.value.errorValue().message).toEqual(
-      'name should be lower than 20 chars',
+      'code should be lower than 4 chars',
     );
   });
 
-  it('Error: code exist', async () => {
+  it('Error: Code exist', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(true);
     companyRepoMock.existCompanyWithName.mockReturnValue(false);
     const resp = await createCompanyUseCase.execute({
@@ -161,7 +161,7 @@ describe('Testing Create-Company Use-Case', () => {
     );
   });
 
-  it('Error: name exist', async () => {
+  it('Error: Name exist', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(false);
     companyRepoMock.existCompanyWithName.mockReturnValue(true);
     const resp = await createCompanyUseCase.execute({
@@ -175,7 +175,7 @@ describe('Testing Create-Company Use-Case', () => {
     );
   });
 
-  it('Error: code undefined', async () => {
+  it('Error: Code undefined', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(false);
     companyRepoMock.existCompanyWithName.mockReturnValue(true);
     const resp = await createCompanyUseCase.execute({
@@ -188,7 +188,7 @@ describe('Testing Create-Company Use-Case', () => {
     expect(resp.value.errorValue().message).toEqual('code should be defined');
   });
 
-  it('Error: name undefined', async () => {
+  it('Error: Name undefined', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(false);
     companyRepoMock.existCompanyWithName.mockReturnValue(true);
     const resp = await createCompanyUseCase.execute({
@@ -201,7 +201,7 @@ describe('Testing Create-Company Use-Case', () => {
     expect(resp.value.errorValue().message).toEqual('name should be defined');
   });
 
-  it('Error: code null', async () => {
+  it('Error: Code null', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(false);
     companyRepoMock.existCompanyWithName.mockReturnValue(true);
     const resp = await createCompanyUseCase.execute({
@@ -214,7 +214,7 @@ describe('Testing Create-Company Use-Case', () => {
     expect(resp.value.errorValue().message).toEqual('code should be defined');
   });
 
-  it('Error: name null', async () => {
+  it('Error: Name null', async () => {
     companyRepoMock.existCompanyWithCode.mockReturnValue(false);
     companyRepoMock.existCompanyWithName.mockReturnValue(true);
     const resp = await createCompanyUseCase.execute({
@@ -225,5 +225,20 @@ describe('Testing Create-Company Use-Case', () => {
     expect(resp.isLeft()).toBeTruthy();
     expect(resp.value instanceof AppError.ValidationError).toBeTruthy();
     expect(resp.value.errorValue().message).toEqual('name should be defined');
+  });
+
+  it('Error: Create company repository error', async () => {
+    companyRepoMock.existCompanyWithCode.mockReturnValue(false);
+    companyRepoMock.existCompanyWithName.mockReturnValue(false);
+    companyRepoMock.create.mockImplementation(() => {
+      throw new Error('Test error');
+    });
+    const resp = await createCompanyUseCase.execute({
+      code: 'LOR',
+      name: 'Lorem ipsum...',
+    });
+
+    expect(resp.isLeft()).toBeTruthy();
+    expect(resp.value instanceof AppError.UnexpectedError).toBeTruthy();
   });
 });
