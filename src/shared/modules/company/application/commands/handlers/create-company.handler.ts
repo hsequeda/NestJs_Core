@@ -5,8 +5,8 @@ import { CreateCompanyUseCase } from '../../useCases/createCompany/create-compan
 @CommandHandler(CreateCompanyCommand)
 export class CreateCompanyHandler
   implements ICommandHandler<CreateCompanyCommand> {
-  constructor(private createCompanyUseCase: CreateCompanyUseCase) {}
-  async execute({ createCompanyDto }: CreateCompanyCommand) {
-    return await this.createCompanyUseCase.execute(createCompanyDto);
+  constructor(private readonly createCompanyUseCase: CreateCompanyUseCase) {}
+  async execute({ input }: CreateCompanyCommand) {
+    return await this.createCompanyUseCase.execute(input);
   }
 }
