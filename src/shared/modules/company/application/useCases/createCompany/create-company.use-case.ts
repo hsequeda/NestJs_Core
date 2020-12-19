@@ -9,12 +9,11 @@ import { CompanyName } from '../../../domain/value-objects/name.value-object';
 import { CompanyCode } from '../../../domain/value-objects/code.value-object';
 import { AppError } from 'src/shared/core/errors/AppError';
 import { EventPublisher } from '@nestjs/cqrs';
-import { Version } from 'src/shared/domain/version.value-object';
 
 export type CreateCompanyResponse = Either<
   | CompanyErrors.CodeExistError
   | CompanyErrors.NameExistError
-  | AppError.ValidationError<CompanyName | CompanyCode | Version>
+  | AppError.ValidationError<CompanyName | CompanyCode>
   | AppError.UnexpectedError,
   Result<void>
 >;
@@ -52,21 +51,20 @@ export class CreateCompanyUseCase
       companyOrErr.getValue(),
     );
 
-    const codeExist: boolean = await this._companyRepository.existCompanyWithCode(
-      company.code.value,
-    );
-    if (codeExist) {
-      return left(new CompanyErrors.CodeExistError(company.code.value));
-    }
-
-    const nameExist: boolean = await this._companyRepository.existCompanyWithName(
-      company.name.value,
-    );
-    if (nameExist) {
-      return left(new CompanyErrors.NameExistError(company.name.value));
-    }
-
     try {
+      const codeExist: boolean = await this._companyRepository.existCompanyWithCode(
+        company.code.value,
+      );
+      if (codeExist) {
+        return left(new CompanyErrors.CodeExistError(company.code.value));
+      }
+
+      const nameExist: boolean = await this._companyRepository.existCompanyWithName(
+        company.name.value,
+      );
+      if (nameExist) {
+        return left(new CompanyErrors.NameExistError(company.name.value));
+      }
       await this._companyRepository.create(company);
       company.commit();
       return right(Result.ok());
