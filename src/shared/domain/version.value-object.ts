@@ -1,6 +1,7 @@
 import { ValueObject } from './value-object.abstract';
 import { Guard } from '../core/Guard';
 import { Result } from '../core/Result';
+import { AppError } from '../core/errors/AppError';
 
 interface VersionProps {
   value: number;
@@ -18,7 +19,9 @@ export class Version extends ValueObject<VersionProps> {
       'version',
     );
     if (!nullGuardResult.succeeded) {
-      return Result.fail(nullGuardResult);
+      return new AppError.ValidationError({
+        message: nullGuardResult.message,
+      });
     }
     const greatherThanResult = Guard.greaterThan(
       this.minValue,
@@ -26,7 +29,9 @@ export class Version extends ValueObject<VersionProps> {
       'version',
     );
     if (!greatherThanResult.succeeded) {
-      return Result.fail(greatherThanResult);
+      return new AppError.ValidationError({
+        message: greatherThanResult.message,
+      });
     }
     return Result.ok(new Version(props));
   }
