@@ -6,6 +6,7 @@ import { AppConfigModule } from './shared/modules/config/app-config.module';
 import { GraphqlModule } from './shared/modules/graphql/graphql.module';
 import { CompanyModule } from './shared/modules/company/company.module';
 import { DataAccessModule } from './shared/modules/data-access/data-access.module';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -17,5 +18,6 @@ import { DataAccessModule } from './shared/modules/data-access/data-access.modul
     DataAccessModule,
     CompanyModule,
   ],
+  providers: [AppResolver],
 })
 export class AppModule {}
