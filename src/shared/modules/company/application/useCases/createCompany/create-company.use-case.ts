@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Either, Result, left, right } from 'src/shared/core/Result';
 import { CompanyErrors } from '../../../domain/errors/company.error';
 import { Company } from '../../../domain/entities/company.entity';
@@ -28,6 +28,7 @@ export class CreateCompanyUseCase
   ) {}
 
   async execute(request: CreateCompanyDto): Promise<CreateCompanyResponse> {
+    Logger.log('Create Company use case', 'Company');
     const nameOrErr: Result<CompanyName> = CompanyName.create({
       value: request.name,
     });

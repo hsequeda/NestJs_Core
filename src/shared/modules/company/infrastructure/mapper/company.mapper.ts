@@ -4,12 +4,14 @@ import { CompanyName } from '../../domain/value-objects/name.value-object';
 import { CompanyCode } from '../../domain/value-objects/code.value-object';
 import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 import { Result } from 'src/shared/core/Result';
+import { Version } from 'src/shared/domain/version.value-object';
 
 export class CompanyMap {
   public static PersistentToDomain(persistentEntity: CompanyEntity): Company {
     const nameOrErr = CompanyName.create({ value: persistentEntity.name });
     const codeOrErr = CompanyCode.create({ value: persistentEntity.code });
-    const combineResults = Result.combine([nameOrErr, codeOrErr]);
+    const versionOrErr = Version.create({ value: persistentEntity.version });
+    const combineResults = Result.combine([nameOrErr, codeOrErr, versionOrErr]);
     if (combineResults.isFailure) {
       throw new Error(combineResults.errorValue().message);
     }
@@ -22,6 +24,7 @@ export class CompanyMap {
         createdAt: persistentEntity.createdAt,
         updatedAt: persistentEntity.updatedAt,
         deletedAt: persistentEntity.deletedAt,
+        version: versionOrErr.getValue(),
       },
       id,
     );
@@ -43,6 +46,7 @@ export class CompanyMap {
       createdAt: domainEntity.createdAt,
       updatedAt: domainEntity.updatedAt,
       deletedAt: domainEntity.isActive ? undefined : domainEntity.updatedAt,
+      version: domainEntity.version.value,
     };
   }
 }

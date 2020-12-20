@@ -49,6 +49,7 @@ export class CompanyRepository implements ICompanyRepository {
 
   async create(company: Company): Promise<void> {
     const partialCompanyEntity = CompanyMap.DomainToPersitent(company);
+    console.log(partialCompanyEntity);
     await this._companyRepository.create(partialCompanyEntity).save();
   }
 

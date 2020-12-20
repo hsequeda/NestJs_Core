@@ -41,7 +41,8 @@ describe('Testing Company Repository implementation', () => {
       code: 'TCom',
       createdAt: new Date(),
       updatedAt: new Date(),
-      active: true,
+      deletedAt: null,
+      version: 2,
     };
 
     repositoryMock.findOne.mockReturnValue(company);
@@ -69,7 +70,8 @@ describe('Testing Company Repository implementation', () => {
         code: 'TCo1',
         createdAt: new Date(),
         updatedAt: new Date(),
-        active: true,
+        deletedAt: null,
+        version: 2,
       },
       {
         id: new UniqueEntityID().toString(),
@@ -77,7 +79,8 @@ describe('Testing Company Repository implementation', () => {
         code: 'TCo2',
         createdAt: new Date(),
         updatedAt: new Date(),
-        active: true,
+        deletedAt: null,
+        version: 1,
       },
     ];
     repositoryMock.find.mockReturnValue(companies);
