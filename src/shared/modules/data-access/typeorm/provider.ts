@@ -8,7 +8,9 @@ export const typeOrmProvider = TypeOrmModule.forRootAsync({
   inject: [AppConfigService],
   async useFactory(config: AppConfigService) {
     return {
-      entities: [__dirname + '/**/entities/*.entity{.ts,.js}'],
+      entities: [
+        __dirname + '/../../../../**/infrastructure/entities/*.entity{.ts,.js}',
+      ],
       logging: config.app.nodeEnv !== 'production',
       ...config.database,
     } as ConnectionOptions;
