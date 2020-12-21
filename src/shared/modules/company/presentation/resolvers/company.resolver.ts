@@ -1,6 +1,6 @@
-import { Resolver, Args, Mutation } from '@nestjs/graphql';
+import { Resolver, Args, Mutation, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'apollo-server-express';
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { PUB_SUB } from 'src/shared/modules/graphql/gql-pubsub.provider';
 import { CreateCompanyResponse } from '../responses/create-company.response';
 import { CommandBus } from '@nestjs/cqrs';
@@ -14,6 +14,8 @@ import { NameExistError } from '../responses/name-exist.error';
 import { ValidationError } from 'src/shared/core/presentation/responses/validation.error';
 import { UnexpectedError } from 'src/shared/core/presentation/responses/unexpected.error';
 import { Response } from 'src/shared/core/presentation/responses/success.response';
+import { CompanyResp } from '../responses/company.resp';
+import { CompanyEvents } from '../../domain/events/company-events.enum';
 
 @Resolver()
 export class CompanyResolver {
@@ -24,6 +26,7 @@ export class CompanyResolver {
 
   @Mutation(() => CreateCompanyResponse)
   async createCompany(@Args('input') input: CreateCompanyInput) {
+    Logger.log('Create company', 'CompanyResolver');
     const resp: CreateCompanyUseCaseResp = await this._cBus.execute(
       new CreateCompanyCommand(input),
     );
@@ -45,8 +48,9 @@ export class CompanyResolver {
     return new Response();
   }
 
-  // @Subscription()
-  // createCompanySubs() {
-  //   return this._pubsub.asyncIterator('CreatedCompany');
-  // }
+  @Subscription(() => CompanyResp)
+  onCompanyCreated() {
+    Logger.log('Subscribed to CreatedCompany event', 'CompanyResolver');
+    return this._pubsub.asyncIterator(CompanyEvents.CREATED);
+  }
 }

@@ -19,16 +19,16 @@ export namespace CompanyErrors {
     }
   }
   export class CodeExistError extends Result<UseCaseError> {
-    constructor(name: string) {
-      super(false, { message: `User with name '${name}' already exist` });
+    constructor(code: string) {
+      super(false, { message: `User with code '${code}' already exist` });
       Logger.log('Error: Code exist error', 'CompanyError');
       Logger.error(this.errorValue().message);
     }
   }
 
   export class NameExistError extends Result<UseCaseError> {
-    constructor(code: string) {
-      super(false, { message: `User with code '${code}' already exist` });
+    constructor(name: string) {
+      super(false, { message: `User with name '${name}' already exist` });
       Logger.log('Error: Name exist error', 'CompanyError');
       Logger.error(this.errorValue().message);
     }

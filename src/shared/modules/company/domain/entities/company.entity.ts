@@ -7,7 +7,7 @@ import { CompanyName } from '../value-objects/name.value-object';
 import { isNil } from 'lodash';
 import { Version } from 'src/shared/domain/version.value-object';
 import { AggregateDomainEntity } from 'src/shared/domain/aggregate-entity.abstract';
-import { CreatedCompanyEvent } from '../events/create-company.event';
+import { CreatedCompanyEvent } from '../events/created-company.event';
 import { UpdatedCompanyEvent } from '../events/updated-company.event';
 import { DeletedCompanyEvent } from '../events/deleted-company.event';
 import { CompanyErrors } from '../errors/company.error';
@@ -101,7 +101,7 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     const companyOrErr: Result<Company> = this.create(props, id);
     if (companyOrErr.isFailure) return Result.fail(companyOrErr.errorValue());
     const company: Company = companyOrErr.getValue();
-    company.apply(new CreatedCompanyEvent(id.toString()));
+    company.apply(new CreatedCompanyEvent(company));
     return Result.ok(company);
   }
 

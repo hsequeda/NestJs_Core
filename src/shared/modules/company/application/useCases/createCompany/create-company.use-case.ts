@@ -28,7 +28,7 @@ export class CreateCompanyUseCase
   ) {}
 
   async execute(request: CreateCompanyDto): Promise<CreateCompanyResponse> {
-    Logger.log('Create Company use case', 'Company');
+    Logger.log('Executing...', 'CreateCompanyUseCase');
     const nameOrErr: Result<CompanyName> = CompanyName.create({
       value: request.name,
     });

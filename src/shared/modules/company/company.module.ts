@@ -8,6 +8,7 @@ import { CompanyResolver } from './presentation/resolvers/company.resolver';
 import { UpdateCompanyUseCase } from './application/useCases/updateCompany/update-company.use-case';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CompanyEntity } from './infrastructure/entities/company.entity';
+import { EventHandlers } from './presentation/subscribers/index';
 
 @Module({
   imports: [TypeOrmModule.forFeature([CompanyEntity]), CqrsModule],
@@ -17,6 +18,7 @@ import { CompanyEntity } from './infrastructure/entities/company.entity';
     UpdateCompanyUseCase,
     DeleteCompanyUseCase,
     ...CommandHandlers,
+    ...EventHandlers,
     {
       provide: 'ICompanyRepository',
       useClass: CompanyRepository,
