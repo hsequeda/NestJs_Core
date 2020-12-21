@@ -1,4 +1,4 @@
 export interface DeleteCompanyDto {
   id: string;
-  version: number;
+  currentVersion: number;
 }
