@@ -1,24 +1,18 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { CompanyDto } from '../../application/dtos/company.dto';
 
-@ObjectType()
-export class CompanyResp {
-  constructor(
-    id: string,
-    name: string,
-    code: string,
-    isActive: boolean,
-    version: number,
-    createdAt: Date,
-    updatedAt: Date,
-  ) {
-    this.id = id;
-    this.name = name;
-    this.code = code;
-    this.isActive = isActive;
-    this.version = version;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
+@ObjectType('Company')
+export class CompanyResp implements CompanyDto {
+  constructor(params: CompanyDto) {
+    this.id = params.id;
+    this.name = params.name;
+    this.code = params.code;
+    this.isActive = params.isActive;
+    this.version = params.version;
+    this.createdAt = params.createdAt;
+    this.updatedAt = params.updatedAt;
   }
+
   @Field(() => String)
   id: string;
   @Field(() => String)
