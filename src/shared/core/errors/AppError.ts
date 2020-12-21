@@ -11,7 +11,7 @@ export namespace AppError {
   export class UnexpectedError extends Result<UnknownError> {
     public constructor(err: unknown) {
       super(false, {
-        message: 'unexpectedServerError',
+        message: 'An unexpected error occurred.',
         error: err,
       });
       Logger.log('An unexpected error occurred', 'AppError');

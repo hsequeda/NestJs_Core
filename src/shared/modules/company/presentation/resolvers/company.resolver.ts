@@ -1,4 +1,4 @@
-import { Resolver, Args, Subscription, Mutation } from '@nestjs/graphql';
+import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { PubSub } from 'apollo-server-express';
 import { Inject } from '@nestjs/common';
 import { PUB_SUB } from 'src/shared/modules/graphql/gql-pubsub.provider';
@@ -13,6 +13,7 @@ import { CodeExistError } from '../responses/code-exist.error';
 import { NameExistError } from '../responses/name-exist.error';
 import { ValidationError } from 'src/shared/core/presentation/responses/validation.error';
 import { UnexpectedError } from 'src/shared/core/presentation/responses/unexpected.error';
+import { Response } from 'src/shared/core/presentation/responses/success.response';
 
 @Resolver()
 export class CompanyResolver {
@@ -28,26 +29,24 @@ export class CompanyResolver {
     );
     if (resp.isLeft) {
       switch (true) {
-        case resp instanceof CompanyErrors.CodeExistError:
-          return { message: resp.value.errorValue().message } as CodeExistError;
-        case resp instanceof CompanyErrors.NameExistError:
-          return { message: resp.value.errorValue().message } as NameExistError;
-        case resp instanceof AppError.ValidationError:
-          return {
-            message: resp.value.errorValue().message,
-          } as ValidationError;
-
-        case resp instanceof AppError.UnexpectedError:
-          return {
-            message: resp.value.errorValue().message,
-          } as UnexpectedError;
+        case resp.value instanceof CompanyErrors.CodeExistError:
+          return new CodeExistError(resp.value.errorValue().message);
+        case resp.value instanceof CompanyErrors.NameExistError:
+          return new NameExistError(resp.value.errorValue().message);
+        case resp.value instanceof AppError.ValidationError:
+          return new ValidationError(resp.value.errorValue().message);
+        case resp.value instanceof AppError.UnexpectedError:
+          return new UnexpectedError(
+            resp.value.errorValue().message,
+            resp.value.errorValue().error,
+          );
       }
     }
-    return true;
+    return new Response();
   }
 
-  @Subscription()
-  createCompanySubs() {
-    return this._pubsub.asyncIterator('CreatedCompany');
-  }
+  // @Subscription()
+  // createCompanySubs() {
+  //   return this._pubsub.asyncIterator('CreatedCompany');
+  // }
 }
