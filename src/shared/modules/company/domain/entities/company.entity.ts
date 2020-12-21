@@ -40,7 +40,7 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
   }
 
   get isActive(): boolean {
-    return this.props.deletedAt === undefined;
+    return isNil(this.props.deletedAt);
   }
 
   get version(): Version {
@@ -84,6 +84,7 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
 
     this.props.updatedAt = new Date();
     this.props.deletedAt = new Date();
+    this.increaseVersion();
     this.apply(
       new DeletedCompanyEvent(this._id.toString(), this.version.value),
     );
