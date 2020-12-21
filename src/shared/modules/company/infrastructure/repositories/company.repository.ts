@@ -76,26 +76,16 @@ export class CompanyRepository implements ICompanyRepository {
   }
 
   async delete(id: string, currentVersion: Version): Promise<void> {
-    const queryRunner = this._companyRepository.queryRunner;
-    queryRunner.startTransaction();
-    try {
-      const persitedCompany = await this._companyRepository.findOne({
-        where: { id },
-      });
-      if (persitedCompany.version > currentVersion.value)
+    await this._companyRepository.manager.transaction(async txManager => {
+      const company = await txManager.findOne(CompanyEntity, id);
+      if (company.version > currentVersion.value)
         throw new Error(
           'The version of the persisted entity is greater than the one passed through the parameters',
         );
-      persitedCompany.version = currentVersion.value;
-      persitedCompany.deletedAt = new Date();
-      persitedCompany.save();
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw new Error(err.message);
-    } finally {
-      await queryRunner.release();
-    }
+      company.version = currentVersion.value;
+      company.deletedAt = new Date();
+      await txManager.save(company);
+    });
   }
 
   async findOneById(id: string): Promise<Company> {
