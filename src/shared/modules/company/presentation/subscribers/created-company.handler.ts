@@ -9,12 +9,15 @@ import { CompanyMap } from '../../infrastructure/mapper/company.mapper';
 @EventsHandler(CreatedCompanyEvent)
 export class CreatedCompanyHandler
   implements IEventHandler<CreatedCompanyEvent> {
-  constructor(@Inject(PUB_SUB) private readonly _pubsub: PubSub) {}
+  private _logger: Logger;
+  constructor(@Inject(PUB_SUB) private readonly _pubsub: PubSub) {
+    this._logger = new Logger('CreatedCompanyEventHandler');
+  }
 
   handle({ newCompany }: CreatedCompanyEvent) {
-    Logger.log('Publish CreatedCompany event', 'CreatedCompanyHandler');
+    this._logger.log('Publish CreatedCompany event');
     this._pubsub.publish(CompanyEvents.CREATED, {
-      onCompanyCreated: CompanyMap.DomainToDto(newCompany),
+      onCompanyCreated: { company: CompanyMap.DomainToDto(newCompany) },
     });
   }
 }
