@@ -5,6 +5,7 @@ import { CompanyCode } from '../../domain/value-objects/code.value-object';
 import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 import { Result } from 'src/shared/core/Result';
 import { Version } from 'src/shared/domain/version.value-object';
+import { CompanyDto } from '../../application/dtos/company.dto';
 
 export class CompanyMap {
   public static PersistentToDomain(persistentEntity: CompanyEntity): Company {
@@ -46,6 +47,18 @@ export class CompanyMap {
       createdAt: domainEntity.createdAt,
       updatedAt: domainEntity.updatedAt,
       deletedAt: domainEntity.isActive ? undefined : domainEntity.updatedAt,
+      version: domainEntity.version.value,
+    };
+  }
+
+  public static DomainToDto(domainEntity: Company): CompanyDto {
+    return {
+      id: domainEntity._id.toString(),
+      code: domainEntity.code.value,
+      name: domainEntity.name.value,
+      createdAt: domainEntity.createdAt,
+      updatedAt: domainEntity.updatedAt,
+      isActive: domainEntity.isActive,
       version: domainEntity.version.value,
     };
   }
