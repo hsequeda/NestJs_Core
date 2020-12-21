@@ -8,6 +8,7 @@ export const graphqlProvider = GraphQLModule.forRootAsync({
   async useFactory(config: AppConfigService) {
     return {
       autoSchemaFile: config.graphql.schema,
+      installSubscriptionHandlers: true,
       playground: config.app.nodeEnv !== NodeEnv.PRODUCTION,
       debug: config.app.nodeEnv !== NodeEnv.PRODUCTION,
       introspection: config.app.nodeEnv !== NodeEnv.PRODUCTION,
