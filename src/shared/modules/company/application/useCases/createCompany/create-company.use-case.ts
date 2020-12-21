@@ -21,14 +21,17 @@ export type CreateCompanyResponse = Either<
 @Injectable()
 export class CreateCompanyUseCase
   implements IUseCase<CreateCompanyDto, Promise<CreateCompanyResponse>> {
+  private _logger: Logger;
   constructor(
     @Inject('ICompanyRepository')
     private readonly _companyRepository: ICompanyRepository,
     private readonly _publisher: EventPublisher,
-  ) {}
+  ) {
+    this._logger = new Logger('CreateCompanyUseCase');
+  }
 
   async execute(request: CreateCompanyDto): Promise<CreateCompanyResponse> {
-    Logger.log('Executing...', 'CreateCompanyUseCase');
+    this._logger.log('Executing...');
     const nameOrErr: Result<CompanyName> = CompanyName.create({
       value: request.name,
     });

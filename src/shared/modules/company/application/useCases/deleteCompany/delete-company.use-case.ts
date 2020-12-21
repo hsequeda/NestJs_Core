@@ -1,5 +1,5 @@
 import { IUseCase } from 'src/shared/core/interfaces/IUseCase';
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { ICompanyRepository } from '../../../domain/interfaces/IRepository';
 import { EventPublisher } from '@nestjs/cqrs';
 import { DeleteCompanyDto } from '../../dtos/delete-company.dto';
@@ -9,7 +9,7 @@ import { AppError } from 'src/shared/core/errors/AppError';
 import { CompanyErrors } from '../../../domain/errors/company.error';
 import { Version } from 'src/shared/domain/version.value-object';
 
-type Response = Either<
+export type DeleteCompanyUseCaseResp = Either<
   | CompanyErrors.CompanyDoesntExist
   | CompanyErrors.CompanyHasBeenDeleted
   | AppError.ValidationError<Version>
@@ -18,14 +18,18 @@ type Response = Either<
 >;
 
 export class DeleteCompanyUseCase
-  implements IUseCase<DeleteCompanyDto, Response> {
+  implements IUseCase<DeleteCompanyDto, DeleteCompanyUseCaseResp> {
+  private _logger: Logger;
   constructor(
     @Inject('ICompanyRepository')
     private readonly _companyRepository: ICompanyRepository,
     private readonly _publisher: EventPublisher,
-  ) {}
+  ) {
+    this._logger = new Logger('DeleteCompanyUseCase');
+  }
 
-  async execute(request: DeleteCompanyDto): Promise<Response> {
+  async execute(request: DeleteCompanyDto): Promise<DeleteCompanyUseCaseResp> {
+    this._logger.log('Executing...');
     try {
       const existCompanyWithId = await this._companyRepository.existCompanyWithId(
         request.id,
@@ -37,7 +41,7 @@ export class DeleteCompanyUseCase
       return left(new AppError.UnexpectedError(err));
     }
 
-    const versionOrErr = Version.create({ value: request.version });
+    const versionOrErr = Version.create({ value: request.currentVersion });
     if (versionOrErr.isFailure) {
       return left(versionOrErr);
     }
@@ -51,7 +55,7 @@ export class DeleteCompanyUseCase
       const voidOrErr = company.markHasDeleted();
       if (voidOrErr.isLeft()) return left(voidOrErr.value);
 
-      this._companyRepository.delete(request.id, version);
+      await this._companyRepository.delete(request.id, version);
       company.commit();
       return right(Result.ok());
     } catch (err) {
