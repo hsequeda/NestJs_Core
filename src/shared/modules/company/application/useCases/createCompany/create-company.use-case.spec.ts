@@ -13,26 +13,7 @@ import { CompanyName } from '../../../domain/value-objects/name.value-object';
 import { CompanyCode } from '../../../domain/value-objects/code.value-object';
 import { Version } from 'src/shared/domain/version.value-object';
 import { AppError } from 'src/shared/core/errors/AppError';
-
-export const companyRepositoryMock: () => MockType<
-  ICompanyRepository
-> = jest.fn(() => ({
-  existCompanyWithId: jest.fn(async () => false),
-  existCompanyWithName: jest.fn(async () => false),
-  existCompanyWithCode: jest.fn(async () => false),
-  create: jest.fn(async (company: Company) => company),
-  update: jest.fn(async () => {}),
-  delete: jest.fn(async () => {}),
-  paginatedFindCompany: jest.fn(async () => {
-    return defaultPaginatedFindResult as PaginatedFindResult<Company>;
-  }),
-  findOneById: jest.fn(async () => {
-    return {} as Company;
-  }),
-  findAllCompanies: jest.fn(() => {
-    return [{} as Company];
-  }),
-}));
+import { companyRepositoryMock } from '../../../domain/interfaces/repository.mock';
 
 describe('Testing Create-Company Use-Case', () => {
   let createCompanyUseCase: CreateCompanyUseCase;

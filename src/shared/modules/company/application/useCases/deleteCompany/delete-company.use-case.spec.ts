@@ -14,26 +14,7 @@ import { CompanyName } from '../../../domain/value-objects/name.value-object';
 import { Version } from 'src/shared/domain/version.value-object';
 import { CompanyErrors } from '../../../domain/errors/company.error';
 import { AppError } from 'src/shared/core/errors/AppError';
-
-export const companyRepositoryMock: () => MockType<
-  ICompanyRepository
-> = jest.fn(() => ({
-  existCompanyWithId: jest.fn(async () => false),
-  existCompanyWithName: jest.fn(async () => false),
-  existCompanyWithCode: jest.fn(async () => false),
-  create: jest.fn(async (company: Company) => company),
-  update: jest.fn(async () => {}),
-  delete: jest.fn(async () => {}),
-  paginatedFindCompany: jest.fn(async () => {
-    return defaultPaginatedFindResult as PaginatedFindResult<Company>;
-  }),
-  findOneById: jest.fn(async () => {
-    return {} as Company;
-  }),
-  findAllCompanies: jest.fn(() => {
-    return [{} as Company];
-  }),
-}));
+import { companyRepositoryMock } from '../../../domain/interfaces/repository.mock';
 
 describe('Testing Delete-Company Use-Case', () => {
   let deleteCompanyUseCase: DeleteCompanyUseCase;
@@ -79,7 +60,7 @@ describe('Testing Delete-Company Use-Case', () => {
       return {};
     });
 
-    const resp = await deleteCompanyUseCase.execute({ id, version: 1 });
+    const resp = await deleteCompanyUseCase.execute({ id, currentVersion: 1 });
     expect(resp.isRight()).toBeTruthy();
     expect(deletedId).toEqual(id);
     expect(
@@ -92,7 +73,7 @@ describe('Testing Delete-Company Use-Case', () => {
 
     const resp = await deleteCompanyUseCase.execute({
       id: 'testId',
-      version: 1,
+      currentVersion: 1,
     });
 
     expect(resp.isLeft).toBeTruthy();
@@ -104,7 +85,7 @@ describe('Testing Delete-Company Use-Case', () => {
 
     const resp = await deleteCompanyUseCase.execute({
       id: 'testId',
-      version: -1,
+      currentVersion: -1,
     });
 
     expect(resp.isLeft).toBeTruthy();
@@ -118,7 +99,7 @@ describe('Testing Delete-Company Use-Case', () => {
 
     const resp = await deleteCompanyUseCase.execute({
       id: 'testId',
-      version: 1,
+      currentVersion: 1,
     });
 
     expect(resp.isLeft).toBeTruthy();
@@ -133,7 +114,7 @@ describe('Testing Delete-Company Use-Case', () => {
 
     const resp = await deleteCompanyUseCase.execute({
       id: 'testId',
-      version: 1,
+      currentVersion: 1,
     });
 
     expect(resp.isLeft).toBeTruthy();
