@@ -5,10 +5,23 @@ import { ClassType } from 'type-graphql';
 export default function getGenericPaginatedFindResult<T>(
   Type: ClassType<T>,
 ): any {
+  interface GenericPaginatedFindParams<T> {
+    items: T[];
+    limit: number;
+    currentPage: number;
+    totalPages: number;
+  }
+
   @ObjectType({ isAbstract: true })
   abstract class GenericPaginatedFindResponse
     implements PaginatedFindResult<T> {
-    @Field(() => Type)
+    constructor(data: GenericPaginatedFindParams<T>) {
+      this.items = data.items;
+      this.limit = data.limit;
+      this.currentPage = data.currentPage;
+      this.totalPages = data.totalPages;
+    }
+    @Field(() => [Type])
     items: T[];
     @Field(() => Int)
     limit: number;
