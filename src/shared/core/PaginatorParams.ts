@@ -1,13 +1,19 @@
 import { ValueObject } from '../domain/value-object.abstract';
 import { Guard } from './Guard';
 import { Result } from './Result';
+import { AppError } from './errors/AppError';
 
-interface PaginatorParamsProps {
+export interface PageParamsDto {
   pageNum: number;
   pageLimit: number;
 }
 
-export class PaginatorParams extends ValueObject<PaginatorParamsProps> {
+interface PageParamsProps {
+  pageNum: number;
+  pageLimit: number;
+}
+
+export class PageParams extends ValueObject<PageParamsProps> {
   static pageMinValue = 1;
   static pageLimitMinValue = 1;
 
@@ -19,7 +25,7 @@ export class PaginatorParams extends ValueObject<PaginatorParamsProps> {
     return this.props.pageNum;
   }
 
-  static create(props: PaginatorParamsProps): Result<PaginatorParams> {
+  static create(props: PageParamsProps): Result<PageParams> {
     const pageLimitIsGreaterThanResult = Guard.greaterThanEqual(
       this.pageLimitMinValue,
       props.pageLimit,
@@ -27,7 +33,7 @@ export class PaginatorParams extends ValueObject<PaginatorParamsProps> {
     );
 
     if (!pageLimitIsGreaterThanResult.succeeded)
-      return Result.fail(pageLimitIsGreaterThanResult);
+      return new AppError.ValidationError(pageLimitIsGreaterThanResult);
     const pageNumIsGreaterThanResult = Guard.greaterThanEqual(
       this.pageMinValue,
       props.pageNum,
@@ -35,8 +41,8 @@ export class PaginatorParams extends ValueObject<PaginatorParamsProps> {
     );
 
     if (!pageNumIsGreaterThanResult.succeeded)
-      return Result.fail(pageNumIsGreaterThanResult);
+      return new AppError.ValidationError(pageNumIsGreaterThanResult);
 
-    return Result.ok(new PaginatorParams(props));
+    return Result.ok(new PageParams(props));
   }
 }
