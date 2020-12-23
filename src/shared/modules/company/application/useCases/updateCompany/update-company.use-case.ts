@@ -21,7 +21,7 @@ export type UpdateCompanyUseCaseResp = Either<
   | CompanyErrors.CompanyDoesntExist
   | AppError.ValidationError<CompanyCode | CompanyName>
   | AppError.UnexpectedError,
-  Result<void>
+  Result<Company>
 >;
 
 export class UpdateCompanyUseCase
@@ -64,7 +64,7 @@ export class UpdateCompanyUseCase
       }
 
       const voidOrErr = company.changeName(nameOrErr.getValue());
-      if (voidOrErr.isLeft()) return voidOrErr;
+      if (voidOrErr.isLeft()) return left(voidOrErr.value);
     }
 
     if (has(request, 'code')) {
@@ -73,7 +73,7 @@ export class UpdateCompanyUseCase
       if (codeOrErr.isFailure) return left(codeOrErr);
 
       const voidOrErr = company.changeCode(codeOrErr.getValue());
-      if (voidOrErr.isLeft()) return voidOrErr;
+      if (voidOrErr.isLeft()) return left(voidOrErr.value);
     }
     const versionOrErr = Version.create({ value: request.currentVersion });
     if (versionOrErr.isFailure) return left(versionOrErr);
@@ -82,7 +82,7 @@ export class UpdateCompanyUseCase
     try {
       await this._companyRepository.update(company, version);
       company.commit();
-      return right(Result.ok());
+      return right(Result.ok(company));
     } catch (err) {
       return left(new AppError.UnexpectedError(err));
     }

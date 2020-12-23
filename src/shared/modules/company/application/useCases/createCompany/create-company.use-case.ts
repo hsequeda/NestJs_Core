@@ -15,7 +15,7 @@ export type CreateCompanyResponse = Either<
   | CompanyErrors.NameExistError
   | AppError.ValidationError<CompanyName | CompanyCode>
   | AppError.UnexpectedError,
-  Result<void>
+  Result<Company>
 >;
 
 @Injectable()
@@ -71,7 +71,7 @@ export class CreateCompanyUseCase
       }
       await this._companyRepository.create(company);
       company.commit();
-      return right(Result.ok());
+      return right(Result.ok(company));
     } catch (err) {
       return left(new AppError.UnexpectedError(err));
     }

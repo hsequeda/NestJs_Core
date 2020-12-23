@@ -40,6 +40,7 @@ import { PaginatedFindCompanyQuery } from '../../application/queries/impl/pagina
 import { PaginatedFindCompanyResponse } from '../responses/paginated-find-company.response';
 import { PaginatedFindResult } from 'src/shared/core/PaginatedFindResult';
 import { PaginatedFindCompanyResult } from '../responses/paginated-find-company.result';
+import { CompanySuccess } from '../responses/company-success.response';
 
 @Resolver()
 export class CompanyResolver {
@@ -127,7 +128,9 @@ export class CompanyResolver {
           );
       }
     }
-    return new SuccessResponse();
+    return new CompanySuccess(
+      CompanyMap.DomainToDto(resp.value.getValue() as Company),
+    );
   }
 
   @Mutation(() => DeleteCompanyResponse)
@@ -154,7 +157,9 @@ export class CompanyResolver {
           );
       }
     }
-    return new SuccessResponse();
+    return new CompanySuccess(
+      CompanyMap.DomainToDto(resp.value.getValue() as Company),
+    );
   }
 
   @Mutation(() => UpdateCompanyResponse)
@@ -184,7 +189,9 @@ export class CompanyResolver {
           );
       }
     }
-    return new SuccessResponse();
+    return new CompanySuccess(
+      CompanyMap.DomainToDto(resp.value.getValue() as Company),
+    );
   }
 
   @Subscription(() => DeletedCompanySubsResponse)

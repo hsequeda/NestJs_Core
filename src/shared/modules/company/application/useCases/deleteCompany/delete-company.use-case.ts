@@ -15,7 +15,7 @@ export type DeleteCompanyUseCaseResp = Either<
   | CompanyErrors.CompanyHasBeenDeleted
   | AppError.ValidationError<Version>
   | AppError.UnexpectedError,
-  Result<void>
+  Result<Company>
 >;
 
 export class DeleteCompanyUseCase
@@ -61,7 +61,7 @@ export class DeleteCompanyUseCase
 
       await this._companyRepository.delete(id, version);
       company.commit();
-      return right(Result.ok());
+      return right(Result.ok(company));
     } catch (err) {
       return left(new AppError.UnexpectedError(err));
     }

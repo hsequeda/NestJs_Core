@@ -3,12 +3,12 @@ import { UnexpectedError } from 'src/shared/core/presentation/responses/unexpect
 import { ValidationError } from 'src/shared/core/presentation/responses/validation.error';
 import { CompanyDoesntExistError } from './company-doesnt-exist.error';
 import { CompanyHasBeenDeletedError } from './company-has-been-deleted.error';
-import { SuccessResponse } from 'src/shared/core/presentation/responses/success.response';
+import { CompanySuccess } from './company-success.response';
 
 export const DeleteCompanyResponse = createUnionType({
   name: 'DeleteCompanyResponse',
   types: () => [
-    SuccessResponse,
+    CompanySuccess,
     CompanyDoesntExistError,
     CompanyHasBeenDeletedError,
     ValidationError,
