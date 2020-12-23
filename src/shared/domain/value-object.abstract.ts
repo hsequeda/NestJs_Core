@@ -8,7 +8,7 @@ interface ValueObjectProps {
  */
 
 export abstract class ValueObject<T extends ValueObjectProps> {
-  public props: T;
+  protected readonly props: T;
 
   protected constructor(props: T) {
     this.props = props;

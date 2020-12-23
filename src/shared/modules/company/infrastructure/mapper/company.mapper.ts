@@ -6,6 +6,7 @@ import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 import { Result } from 'src/shared/core/Result';
 import { Version } from 'src/shared/domain/version.value-object';
 import { CompanyDto } from '../../application/dtos/company.dto';
+import { isNil } from 'lodash';
 
 export class CompanyMap {
   public static PersistentToDomain(persistentEntity: CompanyEntity): Company {
@@ -24,7 +25,7 @@ export class CompanyMap {
         code: codeOrErr.getValue(),
         createdAt: persistentEntity.createdAt,
         updatedAt: persistentEntity.updatedAt,
-        deletedAt: persistentEntity.deletedAt,
+        isActive: isNil(persistentEntity.deletedAt),
         version: versionOrErr.getValue(),
       },
       id,
