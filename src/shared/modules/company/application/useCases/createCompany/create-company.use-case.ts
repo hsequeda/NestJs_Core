@@ -57,17 +57,17 @@ export class CreateCompanyUseCase
 
     try {
       const codeExist: boolean = await this._companyRepository.existCompanyWithCode(
-        company.code.value,
+        company.code,
       );
       if (codeExist) {
-        return left(new CompanyErrors.CodeExistError(company.code.value));
+        return left(new CompanyErrors.CodeExistError(company.code));
       }
 
       const nameExist: boolean = await this._companyRepository.existCompanyWithName(
-        company.name.value,
+        company.name,
       );
       if (nameExist) {
-        return left(new CompanyErrors.NameExistError(company.name.value));
+        return left(new CompanyErrors.NameExistError(company.name));
       }
       await this._companyRepository.create(company);
       company.commit();

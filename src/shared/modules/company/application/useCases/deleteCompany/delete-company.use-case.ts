@@ -8,6 +8,7 @@ import { Company } from '../../../domain/entities/company.entity';
 import { AppError } from 'src/shared/core/errors/AppError';
 import { CompanyErrors } from '../../../domain/errors/company.error';
 import { Version } from 'src/shared/domain/version.value-object';
+import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 
 export type DeleteCompanyUseCaseResp = Either<
   | CompanyErrors.CompanyDoesntExist
@@ -30,17 +31,7 @@ export class DeleteCompanyUseCase
 
   async execute(request: DeleteCompanyDto): Promise<DeleteCompanyUseCaseResp> {
     this._logger.log('Executing...');
-    try {
-      const existCompanyWithId = await this._companyRepository.existCompanyWithId(
-        request.id,
-      );
-      if (!existCompanyWithId) {
-        return left(new CompanyErrors.CompanyDoesntExist(request.id));
-      }
-    } catch (err) {
-      return left(new AppError.UnexpectedError(err));
-    }
-
+    const id = new UniqueEntityID(request.id);
     const versionOrErr = Version.create({ value: request.currentVersion });
     if (versionOrErr.isFailure) {
       return left(versionOrErr);
@@ -48,14 +39,27 @@ export class DeleteCompanyUseCase
 
     const version: Version = versionOrErr.getValue();
     try {
-      const company: Company = this._publisher.mergeObjectContext(
-        await this._companyRepository.findOneById(request.id),
-      );
+      const companyOrNone = await this._companyRepository.findOneById(id, true);
+      let company: Company;
 
+      const companyOrErr: Result<Company> = companyOrNone.match({
+        some: (company: Company) => {
+          return Result.ok(this._publisher.mergeObjectContext(company));
+        },
+        none: () => {
+          return new CompanyErrors.CompanyDoesntExist(id);
+        },
+      });
+
+      if (companyOrErr.isFailure) {
+        return left(companyOrErr);
+      }
+
+      company = companyOrErr.getValue();
       const voidOrErr = company.markHasDeleted();
       if (voidOrErr.isLeft()) return left(voidOrErr.value);
 
-      await this._companyRepository.delete(request.id, version);
+      await this._companyRepository.delete(id, version);
       company.commit();
       return right(Result.ok());
     } catch (err) {

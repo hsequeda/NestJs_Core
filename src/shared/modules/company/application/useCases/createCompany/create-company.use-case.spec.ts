@@ -1,9 +1,5 @@
 import { Company } from '../../../domain/entities/company.entity';
 import { ICompanyRepository } from '../../../domain/interfaces/IRepository';
-import {
-  PaginatedFindResult,
-  defaultPaginatedFindResult,
-} from 'src/shared/core/PaginatedFindResult';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateCompanyUseCase } from './create-company.use-case';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -138,7 +134,9 @@ describe('Testing Create-Company Use-Case', () => {
     expect(resp.isLeft()).toBeTruthy();
     expect(resp.value instanceof CompanyErrors.CodeExistError).toBeTruthy();
     expect(resp.value.errorValue()).toEqual(
-      new CompanyErrors.CodeExistError('LOR').errorValue(),
+      new CompanyErrors.CodeExistError(
+        CompanyCode.create({ value: 'LOR' }).getValue(),
+      ).errorValue(),
     );
   });
 
@@ -152,7 +150,9 @@ describe('Testing Create-Company Use-Case', () => {
     expect(resp.isLeft()).toBeTruthy();
     expect(resp.value instanceof CompanyErrors.NameExistError).toBeTruthy();
     expect(resp.value.errorValue()).toEqual(
-      new CompanyErrors.NameExistError('Lorem ipsum...').errorValue(),
+      new CompanyErrors.NameExistError(
+        CompanyName.create({ value: 'Lorem ipsum...' }).getValue(),
+      ).errorValue(),
     );
   });
 

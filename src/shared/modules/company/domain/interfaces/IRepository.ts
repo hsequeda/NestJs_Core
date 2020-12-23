@@ -2,14 +2,17 @@ import { Company } from '../entities/company.entity';
 import { FieldOptions } from 'src/shared/modules/data-access/types/IFieldOptions';
 import { QualitativeFieldOptions } from 'src/shared/modules/data-access/types/IQualitativeFieldOptions';
 import { PaginatedFindResult } from 'src/shared/core/PaginatedFindResult';
-import { PaginatorParams } from 'src/shared/core/PaginatorParams';
+import { PageParams } from 'src/shared/core/PaginatorParams';
 import { Version } from 'src/shared/domain/version.value-object';
+import { CompanyCode } from '../value-objects/code.value-object';
+import { CompanyName } from '../value-objects/name.value-object';
+import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
+import Optional from 'src/shared/core/Option';
 
 export type WhereCompany = {
   id?: FieldOptions<string | number>;
   code?: QualitativeFieldOptions;
   name?: QualitativeFieldOptions;
-  active?: FieldOptions<boolean>;
 };
 
 export enum OrderCompanyEnum {
@@ -27,22 +30,13 @@ export enum OrderCompanyEnum {
 
 export interface ICompanyRepository {
   /**
-   * Check if exist an active Company with the passed 'id'
-   *
-   * @param {string} id
-   * @returns  {(Promise<boolean> | boolean)}
-   * @memberof ICCompanyRepository
-   */
-  existCompanyWithId(id: string): Promise<boolean> | boolean;
-
-  /**
    * Check if exist an active Company with the passed 'name'
    *
    * @param {string} name
    * @returns  {(Promise<boolean> | boolean)}
    * @memberof ICCompanyRepository
    */
-  existCompanyWithName(name: string): Promise<boolean> | boolean;
+  existCompanyWithName(name: CompanyName): Promise<boolean> | boolean;
 
   /**
    * Check if exist an active Company with the passed 'code'
@@ -51,10 +45,10 @@ export interface ICompanyRepository {
    * @returns  {(Promise<boolean> | boolean)}
    * @memberof ICCompanyRepository
    */
-  existCompanyWithCode(code: string): Promise<boolean> | boolean;
+  existCompanyWithCode(code: CompanyCode): Promise<boolean> | boolean;
 
   /**
-   * Persist or update a Company.
+   * Persist a new Company.
    *
    * @param {Company} company
    * @returns  {(Promise<void> | void)}
@@ -63,7 +57,7 @@ export interface ICompanyRepository {
   create(company: Company): Promise<void> | void;
 
   /**
-   * Persist or update a Company.
+   * Update a Company.
    *
    * @param {Company} company
    * @returns  {(Promise<void> | void)}
@@ -78,13 +72,16 @@ export interface ICompanyRepository {
    * @returns  {(Promise<void> | void)}
    * @memberof ICCompanyRepository
    */
-  delete(id: string, currentVersion: Version): Promise<void> | void;
+  delete(id: UniqueEntityID, currentVersion: Version): Promise<void> | void;
 
   paginatedFindCompany(
-    paginatorParams: PaginatorParams,
+    paginatorParams: PageParams,
     where?: WhereCompany,
     order?: OrderCompanyEnum,
   ): Promise<PaginatedFindResult<Company>> | PaginatedFindResult<Company>;
-  findOneById(id: string): Promise<Company> | Company;
-  findAllCompanies(where?: WhereCompany): Promise<Company[]> | Company[];
+  findOneById(
+    id: UniqueEntityID,
+    active?: boolean,
+  ): Promise<Optional<Company>> | Optional<Company>;
+  // findAllCompanies(where?: WhereCompany): Promise<Company[]> | Company[];
 }

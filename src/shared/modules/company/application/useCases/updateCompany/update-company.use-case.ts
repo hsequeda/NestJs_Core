@@ -2,7 +2,7 @@ import { IUseCase } from 'src/shared/core/interfaces/IUseCase';
 import { UpdateCompanyDto } from '../../dtos/update-company.dto';
 import { Result, Either, left, right } from 'src/shared/core/Result';
 import { AppError } from 'src/shared/core/errors/AppError';
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { ICompanyRepository } from '../../../domain/interfaces/IRepository';
 import { EventPublisher } from '@nestjs/cqrs';
 import { CompanyErrors } from '../../../domain/errors/company.error';
@@ -12,10 +12,12 @@ import { Company } from '../../../domain/entities/company.entity';
 import { CompanyName } from '../../../domain/value-objects/name.value-object';
 import { CompanyCode } from '../../../domain/value-objects/code.value-object';
 import { Version } from 'src/shared/domain/version.value-object';
+import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 
-type Response = Either<
+export type UpdateCompanyUseCaseResp = Either<
   | CompanyErrors.CodeExistError
   | CompanyErrors.NameExistError
+  | CompanyErrors.CompanyHasBeenDeleted
   | CompanyErrors.CompanyDoesntExist
   | AppError.ValidationError<CompanyCode | CompanyName>
   | AppError.UnexpectedError,
@@ -23,26 +25,33 @@ type Response = Either<
 >;
 
 export class UpdateCompanyUseCase
-  implements IUseCase<UpdateCompanyDto, Promise<Response>> {
+  implements IUseCase<UpdateCompanyDto, Promise<UpdateCompanyUseCaseResp>> {
+  private _logger: Logger;
   constructor(
-    @Inject() private readonly _companyRepository: ICompanyRepository,
-    @Inject() private readonly _publisher: EventPublisher,
-  ) {}
+    @Inject('ICompanyRepository')
+    private readonly _companyRepository: ICompanyRepository,
+    private readonly _publisher: EventPublisher,
+  ) {
+    this._logger = new Logger('UpdateCompanyUseCase');
+  }
 
-  async execute(request: UpdateCompanyDto): Promise<Response> {
-    const existCompanyWithId = await this._companyRepository.existCompanyWithId(
-      request.id,
-    );
-    if (!existCompanyWithId)
-      return left(new CompanyErrors.CompanyDoesntExist(request.id));
-
+  async execute(request: UpdateCompanyDto): Promise<UpdateCompanyUseCaseResp> {
+    this._logger.log('Executing...');
+    const id = new UniqueEntityID(request.id);
     let company: Company;
-    let initialVersion: Version;
     try {
-      company = this._publisher.mergeObjectContext(
-        await this._companyRepository.findOneById(request.id),
-      );
-      initialVersion = company.version;
+      const companyOrNone = await this._companyRepository.findOneById(id, true);
+
+      const companyOrErr: Result<Company> = companyOrNone.match({
+        some: (company: Company) => {
+          return Result.ok(this._publisher.mergeObjectContext(company));
+        },
+        none: () => {
+          return new CompanyErrors.CompanyDoesntExist(id);
+        },
+      });
+      if (companyOrErr.isFailure) return left(companyOrErr);
+      company = companyOrErr.getValue();
     } catch (err) {
       return left(new AppError.UnexpectedError(err));
     }
@@ -51,25 +60,28 @@ export class UpdateCompanyUseCase
       const nameOrErr = CompanyName.create({ value: request.name });
 
       if (nameOrErr.isFailure) {
-        return left(nameOrErr.errorValue());
+        return left(nameOrErr);
       }
-      company.changeName(nameOrErr.getValue());
+
+      const voidOrErr = company.changeName(nameOrErr.getValue());
+      if (voidOrErr.isLeft()) return voidOrErr;
     }
 
     if (has(request, 'code')) {
       const codeOrErr = CompanyCode.create({ value: request.code });
 
-      if (codeOrErr.isFailure) {
-        return left(codeOrErr.errorValue());
-      }
-      company.changeCode(codeOrErr.getValue());
-    }
+      if (codeOrErr.isFailure) return left(codeOrErr);
 
+      const voidOrErr = company.changeCode(codeOrErr.getValue());
+      if (voidOrErr.isLeft()) return voidOrErr;
+    }
+    const versionOrErr = Version.create({ value: request.currentVersion });
+    if (versionOrErr.isFailure) return left(versionOrErr);
+
+    const version = versionOrErr.getValue();
     try {
-      if (!company.version.equals(initialVersion)) {
-        // await this._companyRepository.save(company);
-        company.commit();
-      }
+      await this._companyRepository.update(company, version);
+      company.commit();
       return right(Result.ok());
     } catch (err) {
       return left(new AppError.UnexpectedError(err));
