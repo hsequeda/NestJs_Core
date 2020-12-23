@@ -3,12 +3,12 @@ import {
   OrderCompanyEnum,
   WhereCompany,
 } from '../../domain/interfaces/IRepository';
-import { PaginatorParams } from 'src/shared/core/PaginatorParams';
+import { PageParams } from 'src/shared/core/PaginatorParams';
 import {
   PaginatedFindResult,
   defaultPaginatedFindResult,
 } from '../../../../core/PaginatedFindResult';
-import { Repository, IsNull } from 'typeorm';
+import { Repository, IsNull, Not, FindOperator } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CompanyEntity } from '../entities/company.entity';
 import { Company } from '../../domain/entities/company.entity';
@@ -16,6 +16,10 @@ import { CompanyMap } from '../mapper/company.mapper';
 import { TypeORMDataAccessUtils } from 'src/shared/modules/data-access/typeorm/field-options.parser';
 import { has, isNil } from 'lodash';
 import { Version } from 'src/shared/domain/version.value-object';
+import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
+import { CompanyName } from '../../domain/value-objects/name.value-object';
+import { CompanyCode } from '../../domain/value-objects/code.value-object';
+import Optional from 'src/shared/core/Option';
 
 export class CompanyRepository implements ICompanyRepository {
   constructor(
@@ -23,26 +27,18 @@ export class CompanyRepository implements ICompanyRepository {
     private readonly _companyRepository: Repository<CompanyEntity>,
   ) {}
 
-  async existCompanyWithId(id: string): Promise<boolean> {
+  async existCompanyWithName(name: CompanyName): Promise<boolean> {
     return (
       (await this._companyRepository.count({
-        where: { id, deletedAt: IsNull() },
+        where: { name: name.value, deletedAt: IsNull() },
       })) > 0
     );
   }
 
-  async existCompanyWithName(name: string): Promise<boolean> {
+  async existCompanyWithCode(code: CompanyCode): Promise<boolean> {
     return (
       (await this._companyRepository.count({
-        where: { name, deletedAt: IsNull() },
-      })) > 0
-    );
-  }
-
-  async existCompanyWithCode(code: string): Promise<boolean> {
-    return (
-      (await this._companyRepository.count({
-        where: { code, deletedAt: IsNull() },
+        where: { code: code.value, deletedAt: IsNull() },
       })) > 0
     );
   }
@@ -75,9 +71,9 @@ export class CompanyRepository implements ICompanyRepository {
     }
   }
 
-  async delete(id: string, currentVersion: Version): Promise<void> {
+  async delete(id: UniqueEntityID, currentVersion: Version): Promise<void> {
     await this._companyRepository.manager.transaction(async txManager => {
-      const company = await txManager.findOne(CompanyEntity, id);
+      const company = await txManager.findOne(CompanyEntity, id.toString());
       if (company.version > currentVersion.value)
         throw new Error(
           'The version of the persisted entity is greater than the one passed through the parameters',
@@ -88,12 +84,18 @@ export class CompanyRepository implements ICompanyRepository {
     });
   }
 
-  async findOneById(id: string): Promise<Company> {
+  async findOneById(
+    id: UniqueEntityID,
+    active?: boolean,
+  ): Promise<Optional<Company>> {
+    const where: { id: string; deletedAt?: FindOperator<Date> } = {
+      id: id.toString(),
+    };
+    if (!isNil(active)) where.deletedAt = active ? IsNull() : Not(IsNull());
     const company: CompanyEntity = await this._companyRepository.findOne({
-      where: { id },
+      where,
     });
-    if (isNil(company)) throw new Error('Company not found');
-    return CompanyMap.PersistentToDomain(company);
+    return Optional(company).map(CompanyMap.PersistentToDomain);
   }
 
   async findAllCompanies(where?: WhereCompany): Promise<Company[]> {
@@ -108,7 +110,7 @@ export class CompanyRepository implements ICompanyRepository {
   }
 
   async paginatedFindCompany(
-    paginatorParams: PaginatorParams,
+    paginatorParams: PageParams,
     where?: WhereCompany,
     orderEnum?: OrderCompanyEnum,
   ): Promise<PaginatedFindResult<Company>> {
@@ -170,8 +172,6 @@ export class CompanyRepository implements ICompanyRepository {
       rawWhere.name = TypeORMDataAccessUtils.parseQualitativeFieldOption(
         where.name,
       );
-    if (has(where, 'active'))
-      rawWhere.active = TypeORMDataAccessUtils.parseFieldOption(where.active);
     return { ...rawWhere };
   }
 
