@@ -11,13 +11,10 @@ interface CompanyNameProps {
 export class CompanyName extends ValueObject<CompanyNameProps> {
   static minLength = 1;
   static maxLength = 20;
+  private readonly _brand?: CompanyNameProps;
 
   get value(): string {
     return this.props.value;
-  }
-
-  private constructor(props: CompanyNameProps) {
-    super(props);
   }
 
   public static create(props: CompanyNameProps): Result<CompanyName> {

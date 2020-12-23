@@ -4,7 +4,6 @@ import { Guard } from 'src/shared/core/Guard';
 import { Result, Either, right, left } from 'src/shared/core/Result';
 import { CompanyCode } from '../value-objects/code.value-object';
 import { CompanyName } from '../value-objects/name.value-object';
-import { isNil } from 'lodash';
 import { Version } from 'src/shared/domain/version.value-object';
 import { AggregateDomainEntity } from 'src/shared/domain/aggregate-entity.abstract';
 import { CreatedCompanyEvent } from '../events/created-company.event';
@@ -16,13 +15,19 @@ import { AppError } from 'src/shared/core/errors/AppError';
 interface CompanyProps {
   code: CompanyCode;
   name: CompanyName;
-  createdAt?: Date;
-  updatedAt?: Date;
-  deletedAt?: Date;
-  version?: Version;
+  version: Version;
+  createdAt: Date;
+  updatedAt: Date;
+  isActive: boolean;
 }
 
+type NewCompanyProps = Omit<
+  CompanyProps,
+  'isActive' | 'updatedAt' | 'createdAt' | 'version'
+>;
+
 export class Company extends AggregateDomainEntity<CompanyProps> {
+  private readonly _brand: Company;
   get code(): CompanyCode {
     return this.props.code;
   }
@@ -32,7 +37,7 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
   }
 
   get createdAt(): Date {
-    return this.props.updatedAt;
+    return this.props.createdAt;
   }
 
   get updatedAt(): Date {
@@ -40,7 +45,7 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
   }
 
   get isActive(): boolean {
-    return isNil(this.props.deletedAt);
+    return this.props.isActive;
   }
 
   get version(): Version {
@@ -57,7 +62,11 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     this.increaseVersion();
     this.props.updatedAt = new Date();
     this.apply(
-      new UpdatedCompanyEvent(this._id.toString(), this.version.value),
+      new UpdatedCompanyEvent({
+        id: this._id.toString(),
+        version: this.version.value,
+        name: this.name.value,
+      }),
     );
     return right(Result.ok());
   }
@@ -68,11 +77,16 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     if (!this.isActive) {
       return left(new CompanyErrors.CompanyHasBeenDeleted());
     }
+
     this.props.code = newCode;
     this.increaseVersion();
     this.props.updatedAt = new Date();
     this.apply(
-      new UpdatedCompanyEvent(this._id.toString(), this.version.value),
+      new UpdatedCompanyEvent({
+        id: this._id.toString(),
+        version: this.version.value,
+        code: this.code.value,
+      }),
     );
     return right(Result.ok());
   }
@@ -83,7 +97,7 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     }
 
     this.props.updatedAt = new Date();
-    this.props.deletedAt = new Date();
+    this.props.isActive = false;
     this.increaseVersion();
     this.apply(
       new DeletedCompanyEvent(this._id.toString(), this.version.value),
@@ -97,9 +111,18 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     }).getValue();
   }
 
-  public static new(props: CompanyProps): Result<Company> {
+  public static new(props: NewCompanyProps): Result<Company> {
     const id = new UniqueEntityID();
-    const companyOrErr: Result<Company> = this.create(props, id);
+    const companyOrErr: Result<Company> = this.create(
+      {
+        ...props,
+        isActive: true,
+        version: Version.create({ value: 1 }).getValue(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      id,
+    );
     if (companyOrErr.isFailure) return Result.fail(companyOrErr.errorValue());
     const company: Company = companyOrErr.getValue();
     company.apply(new CreatedCompanyEvent(company));
@@ -118,10 +141,7 @@ export class Company extends AggregateDomainEntity<CompanyProps> {
     if (!nullGuard.succeeded) {
       return new AppError.ValidationError({ message: nullGuard.message });
     }
-    if (isNil(props.createdAt)) props.createdAt = new Date();
-    if (isNil(props.updatedAt)) props.updatedAt = new Date();
-    if (isNil(props.version))
-      props.version = Version.create({ value: 1 }).getValue();
+
     return Result.ok(new Company(props, id));
   }
 }

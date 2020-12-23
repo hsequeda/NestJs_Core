@@ -10,13 +10,10 @@ interface CompanyCodeProps {
 export class CompanyCode extends ValueObject<CompanyCodeProps> {
   static minLength = 1;
   static maxLength = 4;
+  private readonly _brand?: CompanyCode;
 
   get value(): string {
     return this.props.value;
-  }
-
-  private constructor(props: CompanyCodeProps) {
-    super(props);
   }
 
   public static create(props: CompanyCodeProps): Result<CompanyCode> {

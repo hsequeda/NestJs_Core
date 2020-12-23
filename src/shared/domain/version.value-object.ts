@@ -9,6 +9,7 @@ interface VersionProps {
 
 export class Version extends ValueObject<VersionProps> {
   static minValue = 0;
+  private readonly _brand?: Version;
 
   get value(): number {
     return this.props.value;
