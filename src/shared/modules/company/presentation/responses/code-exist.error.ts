@@ -1,7 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 
 @ObjectType()
-export class CodeExistError {
+export class CompanyCodeExistError {
   constructor(message: string) {
     this.message = message;
   }

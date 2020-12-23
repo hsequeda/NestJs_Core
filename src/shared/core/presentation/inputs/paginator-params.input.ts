@@ -1,4 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
+import { PageParamsDto } from '../../PaginatorParams';
 
 /**
  * Pagination configuration for findAll queries.
@@ -8,7 +9,7 @@ import { InputType, Field, Int } from '@nestjs/graphql';
  * @class PaginatorParams
  */
 @InputType({ description: 'Pagination configuration for findAll queries.' })
-export abstract class PaginatorParams {
-  @Field(() => Int) page?: number = 1;
-  @Field(() => Int) limit?: number = 10;
+export class PageParamsInput implements PageParamsDto {
+  @Field(() => Int, { defaultValue: 1 }) pageNum: number;
+  @Field(() => Int, { defaultValue: 10 }) pageLimit: number;
 }
