@@ -9,6 +9,9 @@ import { UpdateCompanyUseCase } from './application/useCases/updateCompany/updat
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CompanyEntity } from './infrastructure/entities/company.entity';
 import { EventHandlers } from './presentation/subscribers/index';
+import { QueryHandlers } from './application/queries/handlers';
+import { FindOneCompanyUseCase } from './application/useCases/findOneCompany/findone-company.use-case';
+import { PaginatedFindCompanyUseCase } from './application/useCases/paginatedFindCompany/paginated-find-company.use-case';
 
 @Module({
   imports: [TypeOrmModule.forFeature([CompanyEntity]), CqrsModule],
@@ -17,8 +20,11 @@ import { EventHandlers } from './presentation/subscribers/index';
     CreateCompanyUseCase,
     UpdateCompanyUseCase,
     DeleteCompanyUseCase,
+    FindOneCompanyUseCase,
+    PaginatedFindCompanyUseCase,
     ...CommandHandlers,
     ...EventHandlers,
+    ...QueryHandlers,
     {
       provide: 'ICompanyRepository',
       useClass: CompanyRepository,
