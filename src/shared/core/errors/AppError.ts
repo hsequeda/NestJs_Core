@@ -1,5 +1,4 @@
 import { Result } from '../Result';
-import { UnknownError } from './UnknownError';
 import { Logger } from '@nestjs/common';
 import { IResultError } from '../interfaces/IResultError';
 
@@ -8,14 +7,14 @@ import { IResultError } from '../interfaces/IResultError';
  * @http 500
  */
 export namespace AppError {
-  export class UnexpectedError extends Result<UnknownError> {
-    public constructor(err: unknown) {
+  export class UnexpectedError extends Result<unknown> {
+    public constructor(err: any) {
       super(false, {
         message: 'An unexpected error occurred.',
         error: err,
       });
       Logger.log('An unexpected error occurred', 'AppError');
-      Logger.error(err);
+      Logger.error(err.message);
     }
   }
 
