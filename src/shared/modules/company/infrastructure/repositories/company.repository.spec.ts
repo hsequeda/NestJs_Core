@@ -111,37 +111,4 @@ describe('Testing Company Repository implementation', () => {
     expect(paginatedCompanies.currentPage).toEqual(0);
     expect(paginatedCompanies.totalPages).toEqual(0);
   });
-
-  it('PageLimits is more great than companyQty', async () => {
-    const companies = [
-      {
-        id: new UniqueEntityID().toString(),
-        name: 'testCompany1',
-        code: 'TCo1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-        version: 2,
-      },
-      {
-        id: new UniqueEntityID().toString(),
-        name: 'testCompany2',
-        code: 'TCo2',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-        version: 1,
-      },
-    ];
-    repositoryMock.find.mockReturnValue(companies);
-    repositoryMock.count.mockReturnValue(8);
-    const pagParamOrErr = PageParams.create({ pageNum: 3, pageLimit: 10 });
-    expect(pagParamOrErr.isSuccess).toEqual(true);
-    const paginatedCompanies = await companyRepository.paginatedFindCompany(
-      pagParamOrErr.getValue(),
-    );
-    expect(paginatedCompanies.limit).toEqual(8);
-    expect(paginatedCompanies.currentPage).toEqual(1);
-    expect(paginatedCompanies.totalPages).toEqual(1);
-  });
 });

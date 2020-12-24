@@ -58,35 +58,28 @@ export class CompanyRepository implements ICompanyRepository {
 
   async update(company: Company, currentVersion: Version): Promise<void> {
     this._logger.log('Persist update Company');
-    const partialCompanyEntity = CompanyMap.DomainToPersitent(company);
-    const queryRunner = this._companyRepository.queryRunner;
-    queryRunner.startTransaction();
-    try {
-      const persitedCompany = await this._companyRepository.findOne({
-        where: { id: partialCompanyEntity.id },
+    await this._companyRepository.manager.transaction(async txManager => {
+      const companyEntity = await txManager.findOne(CompanyEntity, {
+        where: { id: company._id.toString() },
       });
-      if (persitedCompany.version > currentVersion.value)
+      if (isNil(companyEntity))
         throw new Error(
-          'The version of the persisted entity is greater than the one passed through the parameters',
+          `Company with id: ${company._id.toString()} doesn't exist`,
         );
-      await this._companyRepository.create(partialCompanyEntity).save();
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw new Error(err.message);
-    } finally {
-      await queryRunner.release();
-    }
+
+      if ((companyEntity.version = currentVersion.value))
+        throw new Error('TransactionalError: Unexpected version');
+      const partialCompanyEntity = CompanyMap.DomainToPersitent(company);
+      await txManager.create(CompanyEntity, partialCompanyEntity).save();
+    });
   }
 
   async delete(id: UniqueEntityID, currentVersion: Version): Promise<void> {
     this._logger.log('Removing Company from database');
     await this._companyRepository.manager.transaction(async txManager => {
       const company = await txManager.findOne(CompanyEntity, id.toString());
-      if (company.version > currentVersion.value)
-        throw new Error(
-          'The version of the persisted entity is greater than the one passed through the parameters',
-        );
+      if ((company.version = currentVersion.value))
+        throw new Error('TransactionalError: Unexpected version');
       company.version = currentVersion.value;
       company.deletedAt = new Date();
       await txManager.save(company);
