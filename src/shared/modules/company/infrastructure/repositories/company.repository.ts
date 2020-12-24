@@ -20,14 +20,19 @@ import { UniqueEntityID } from 'src/shared/domain/UniqueEntityID';
 import { CompanyName } from '../../domain/value-objects/name.value-object';
 import { CompanyCode } from '../../domain/value-objects/code.value-object';
 import Optional from 'src/shared/core/Option';
+import { Logger } from '@nestjs/common';
 
 export class CompanyRepository implements ICompanyRepository {
+  private _logger: Logger;
   constructor(
     @InjectRepository(CompanyEntity)
     private readonly _companyRepository: Repository<CompanyEntity>,
-  ) {}
+  ) {
+    this._logger = new Logger('CompanyRepository');
+  }
 
   async existCompanyWithName(name: CompanyName): Promise<boolean> {
+    this._logger.log('Exist Company with name');
     return (
       (await this._companyRepository.count({
         where: { name: name.value, deletedAt: IsNull() },
@@ -36,6 +41,7 @@ export class CompanyRepository implements ICompanyRepository {
   }
 
   async existCompanyWithCode(code: CompanyCode): Promise<boolean> {
+    this._logger.log('Exist Company with code');
     return (
       (await this._companyRepository.count({
         where: { code: code.value, deletedAt: IsNull() },
@@ -44,12 +50,14 @@ export class CompanyRepository implements ICompanyRepository {
   }
 
   async create(company: Company): Promise<void> {
+    this._logger.log('Persistent Company');
     const partialCompanyEntity = CompanyMap.DomainToPersitent(company);
     console.log(partialCompanyEntity);
     await this._companyRepository.create(partialCompanyEntity).save();
   }
 
   async update(company: Company, currentVersion: Version): Promise<void> {
+    this._logger.log('Persist update Company');
     const partialCompanyEntity = CompanyMap.DomainToPersitent(company);
     const queryRunner = this._companyRepository.queryRunner;
     queryRunner.startTransaction();
@@ -72,6 +80,7 @@ export class CompanyRepository implements ICompanyRepository {
   }
 
   async delete(id: UniqueEntityID, currentVersion: Version): Promise<void> {
+    this._logger.log('Removing Company from database');
     await this._companyRepository.manager.transaction(async txManager => {
       const company = await txManager.findOne(CompanyEntity, id.toString());
       if (company.version > currentVersion.value)
@@ -88,6 +97,7 @@ export class CompanyRepository implements ICompanyRepository {
     id: UniqueEntityID,
     active?: boolean,
   ): Promise<Optional<Company>> {
+    this._logger.log('Find One Company by its id');
     const where: { id: string; deletedAt?: FindOperator<Date> } = {
       id: id.toString(),
     };
@@ -114,47 +124,41 @@ export class CompanyRepository implements ICompanyRepository {
     where?: WhereCompany,
     orderEnum?: OrderCompanyEnum,
   ): Promise<PaginatedFindResult<Company>> {
+    this._logger.log(
+      `Find paginated companies in page '${paginatorParams.pageNum}' with a page limit of '${paginatorParams.pageLimit}'`,
+    );
     const rawWhere = this.toRawWhere(where);
-
     const orderBy = this.getCompanyOrderByEnum(orderEnum);
-
     const companyQty = await this._companyRepository.count({
       where: rawWhere,
     });
-
+    this._logger.verbose(`Quantity of actives companies: ${companyQty}`);
     if (companyQty === 0) return defaultPaginatedFindResult;
-
     const pageLimit: number =
       paginatorParams.pageLimit < companyQty
         ? paginatorParams.pageLimit
         : companyQty;
-
-    const totalPages: number = Math.trunc(companyQty / pageLimit);
-
+    const totalPages: number = Math.ceil(companyQty / pageLimit);
     const currentPage: number =
       paginatorParams.pageNum < totalPages
         ? paginatorParams.pageNum
         : totalPages;
+    const findOffset = pageLimit * (currentPage - 1);
 
-    const pageNum: number =
-      paginatorParams.pageNum < totalPages
-        ? paginatorParams.pageNum
-        : totalPages;
-
-    const findOffset = pageLimit * pageNum;
-
+    this._logger.verbose(`currentPage: ${currentPage}`);
+    this._logger.verbose(`offset: ${findOffset}`);
     const persistentCompanies = await this._companyRepository.find({
       where: rawWhere,
       order: orderBy,
       skip: findOffset,
       take: pageLimit,
     });
-
+    const domainCompanies = persistentCompanies.map(persistentCompany =>
+      CompanyMap.PersistentToDomain(persistentCompany),
+    );
     return {
-      items: persistentCompanies.map(persistentCompany =>
-        CompanyMap.PersistentToDomain(persistentCompany),
-      ),
-      limit: pageLimit,
+      items: domainCompanies,
+      limit: paginatorParams.pageLimit,
       currentPage,
       totalPages,
     };
@@ -172,7 +176,7 @@ export class CompanyRepository implements ICompanyRepository {
       rawWhere.name = TypeORMDataAccessUtils.parseQualitativeFieldOption(
         where.name,
       );
-    return { ...rawWhere };
+    return { ...rawWhere, deletedAt: IsNull() };
   }
 
   private getCompanyOrderByEnum(
